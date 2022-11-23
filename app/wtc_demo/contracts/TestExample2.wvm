@@ -1,0 +1,37 @@
+//合约示例
+contract TestExample2 {
+    //初始化一个账户
+    public string init(){
+        string[] name = {"bob","mary"}
+        db_set(name[0], 100)	//初始余额 100
+        db_set(name[1], 100)
+        int k = getBlance(name[0])
+        print(k)
+        return "success"
+    }
+    
+    //转账操作
+    //from,to填name
+    public string transfer(string from, string to, int amount) {
+        int balA = db_get<int>(from)
+        int balB = db_get<int>(to)
+        balA = balA - amount
+        if (balA > 0){
+            balB = balB + amount
+            db_set(from, balA)
+            db_set(to, balB)
+        }else{
+            return "failed"
+        } 
+        return "success"
+    }
+
+    //查询账户余额
+    //account填name
+    public int getBlance(string account){
+        print(account)
+        int a = db_get<int>(account)
+        return a
+    }
+    
+}

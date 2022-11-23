@@ -1,0 +1,21 @@
+{% extends "dash.html" %}
+
+{% block dash_app %}
+<main class="dash-content">
+	<div class="container-fluid">
+		<div class="container">
+		{% with messages = get_flashed_messages() %}
+			{% for message in messages %}
+				{% if message %}
+					<div class="alert alert-info">{{ message }}</div>
+				{% endif %}
+			{% endfor %}
+		{% endwith %}
+		</div>
+		<h3 class="dash-title">{{tabletitle}}</h3>
+		<div class="row">
+			收到：{{ msg }}
+		</div>
+	</div>
+</main>
+{% endblock dash_app %}

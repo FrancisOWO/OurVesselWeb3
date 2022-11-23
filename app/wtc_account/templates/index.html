@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="form-screen">
+	<a href="{{url_for('account.index')}}" class="easion-logo">
+		<span>•ω•&nbsp;&nbsp;【Web 3.0版】船视宝</span>
+	</a>
+	<div class="card account-dialog">
+		<div class="card-header bg-primary text-white">用户登录</div>
+		<div class="card-body">
+			<form method="post">
+				{{ form.csrf_token }}
+				<div class="form-group">
+					<span>账号：</span>
+					{{form.user_id}}
+				</div>
+				<div class="form-group">
+					<span>密码：</span>
+					{{form.password}}
+				</div>
+				<br>
+				<div class="account-dialog-actions">
+					<div  class="btn btn-primary">{{form.submit}}</div>
+					<a class="account-dialog-link" href="{{url_for('account.signup')}}">去注册</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock app_content %}

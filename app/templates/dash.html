@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+{% block dash %}
+<div class="dash">
+	<div class="dash-nav dash-nav-dark">
+		<header>
+			<a href="#!" class="menu-toggle">
+				<i class="fas fa-bars"></i></a>
+			<a href="{{url_for('account.panel')}}" class="easion-logo">
+				<span>•ω•&nbsp;&nbsp;船视导航</span></a>
+		</header>
+		<nav class="dash-nav-list">
+			<a href="{{url_for('account.panel')}}" class="dash-nav-item">
+				<i class="fas fa-home"></i> 主页 </a>
+			<div class="dash-nav-dropdown">
+				<a href="#!" class="dash-nav-item dash-nav-dropdown-toggle">
+					<i class="fas fa-file"></i> 功能 </a>
+				<div class="dash-nav-dropdown-menu">
+					{% for link in demolinks %}
+					<a href="{{url_for('demo.demotest',demoname=link[1])}}" 
+					class="dash-nav-dropdown-item">{{link[0]}}</a>
+					{% endfor %}
+				</div>
+			</div>
+		</nav>
+	</div>
+	<div class="dash-app">
+		<header class="dash-toolbar">
+			<a href="#!" class="menu-toggle">
+				<i class="fas fa-bars"></i>
+			</a>
+			<div class="tools">
+				<a href="#!" class="tools-item">
+					<i class="fas fa-bell"></i>
+				</a>
+				<div class="dropdown tools-item">
+					<a href="#" class="" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="fas fa-user"></i>
+					</a>
+					<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+						<a class="dropdown-item" href="{{url_for('account.changepwd')}}">修改密码</a>
+						<a class="dropdown-item" href="{{url_for('account.login')}}">退出登录</a>
+					</div>
+				</div>
+			</div>
+		</header>
+		{% block dash_app %}
+		{% endblock dash_app %}
+	</div>
+</div>
+{% endblock dash %}
+{% endblock app_content %}
