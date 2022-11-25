@@ -13,9 +13,12 @@
 		{% endwith %}
 		</div>
 		<h3 class="dash-title">{{tabletitle}}</h3>
-		<div class="row">
-			收到：{{ msg }}
+		{% for text in text_list %}
+		<div class="row" style="font-size:x-large;">
+			{{ text }}
 		</div>
+		<br>
+		{% endfor %}
 	</div>
 </main>
 {% endblock dash_app %}

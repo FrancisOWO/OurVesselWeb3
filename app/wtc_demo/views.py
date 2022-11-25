@@ -5,6 +5,8 @@ from app.wtc_account.models import User
 from .forms import TableActForm, DeleteForm, ContentForm
 from app import db
 
+import app.utils.wutongchain as wtc
+
 global status
 status = 0
 
@@ -17,7 +19,7 @@ demolinks = [
 @demo_bp.route('/test/<demoname>', methods=['GET','POST'])
 def demotest(demoname):
 
-    # TODO: // 示例: 与梧桐链数据交互
+    # 示例: 与梧桐链数据交互
     if demoname == "hello":
         return HelloWTC()
     # 示例: 读取本地数据库（用户信息）
@@ -27,14 +29,19 @@ def demotest(demoname):
         return redirect(url_for('account.panel'))
     
 
-# TODO: 与梧桐链数据交互
+# 与梧桐链数据交互
 def HelloWTC():
-    msg = "Hello Hello Hi Hi Hi"
+    text_list = ["Hello Hello Hi Hi Hi",
+        f"区块浏览器: {wtc.get_browser_url()}",
+        f"应用链: {wtc.get_ledger_name()}",
+        f"当前区块高度: {wtc.get_block_height()}",
+        ]
+
     return render_template(
         "hellowtc.html",
         title = 'Hello 梧桐链',
         demolinks = demolinks,
-        msg = msg,
+        text_list = text_list,
     )
 
 
