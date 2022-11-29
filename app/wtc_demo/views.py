@@ -10,11 +10,11 @@ import app.utils.wutongchain as wtc
 global status
 status = 0
 
-# 导航栏链接
 demolinks = [
     ['Hello 梧桐链！', 'hello'],
     ['用户信息', 'userinfo'],
-]
+    ["地图", "map"],
+    ]
 
 @demo_bp.route('/test/<demoname>', methods=['GET','POST'])
 def demotest(demoname):
@@ -25,6 +25,8 @@ def demotest(demoname):
     # 示例: 读取本地数据库（用户信息）
     elif demoname == 'userinfo':       
         return TableUserInfo()
+    elif demoname == 'map':       
+        return redirect(url_for('map.hello_map'))
     else:
         return redirect(url_for('account.panel'))
     
@@ -38,7 +40,7 @@ def HelloWTC():
         ]
 
     return render_template(
-        "hellowtc.html",
+        "helloWTC.html",
         title = 'Hello 梧桐链',
         demolinks = demolinks,
         text_list = text_list,
