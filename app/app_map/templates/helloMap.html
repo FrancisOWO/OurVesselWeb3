@@ -16,10 +16,168 @@
 <script type="text/javascript">
     // GL版命名空间为BMapGL
     // 按住鼠标右键，修改倾斜角和角度
-	var map = new BMapGL.Map("allmap");    // 创建Map实例
-	var point = new BMapGL.Point(106, 34);
-	map.centerAndZoom(point, 4);  // 初始化地图,设置中心点坐标和地图级别
-	map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+	let map = new BMapGL.Map("allmap");		// 创建Map实例
+	let p_center = new BMapGL.Point(106, 34);
+	map.centerAndZoom(p_center, 4);			// 初始化地图,设置中心点坐标和地图级别
+	map.enableScrollWheelZoom(true);		// 开启鼠标滚轮缩放
+
+	// 监听鼠标点击
+	let p_click = p_center;	 // new BMapGL.Point(0, 0);
+	map.addEventListener('rightclick', function(e) {
+		p_click.lng = e.latlng.lng;
+		p_click.lat = e.latlng.lat;
+	});
+
+	// 各种定位图标 allStyleMarker.png
+	// 形状：球针，同心圆，旗
+	// 宽高：(10,20)，(18,30)，(16,18)
+	// 颜色：绿，蓝，红，黄，紫，粉
+	let iconPath = "/static/images/allStyleMarker.png";
+	let icon_w = [10, 18, 16];
+	let icon_h = [22, 27, 18];
+	let icon_hsum = [0, 22, 49];
+
+	// 起点：蓝色 同心圆
+	let shape = 1, color = 1, scale = 1;
+	let iconCircSize = new BMapGL.Size(icon_w[shape], icon_h[shape]);
+	let iconFrom = new BMapGL.Icon(iconPath, iconCircSize, {
+		// 图标相对鼠标点击的位置
+		"anchor": new BMapGL.Size(icon_w[shape]/2, icon_h[shape]),
+		// 图标在allStyleMarker.png中的位置
+		"imageOffset": new BMapGL.Size(color*icon_w[shape], icon_hsum[shape])
+	});
+	iconFrom.setImageSize(scale*icon_w[shape], scale*icon_h[shape]);
+
+	// 终点：红色 同心圆
+	color = 2;
+	let iconTo = new BMapGL.Icon(iconPath, iconCircSize, {
+		"anchor": new BMapGL.Size(icon_w[shape]/2, icon_h[shape]),
+		"imageOffset": new BMapGL.Size(color*icon_w[shape], icon_hsum[shape])
+	});
+	iconTo.setImageSize(scale*icon_w[shape], scale*icon_h[shape]);
+
+	let m_from_id = "m_from";
+	let m_to_id = "m_to";
+
+	// 起点 终点坐标
+	let p_from = p_center;
+	let p_to = p_center;
+
+	// 根据id查找覆盖物
+	function findOverlayByID(id) {
+		let allOverlay = map.getOverlays();
+		for(let i = 0; i < allOverlay.length; i++){
+			// id属性存在 且 ==id
+			if (allOverlay[i].id && allOverlay[i].id == id) {
+				return allOverlay[i];
+			}
+		}
+		return false;
+	}
+
+	// 根据id删除覆盖物
+	function removeOverlayByID(id) {
+		let overlay = findOverlayByID(id);
+		if(overlay == false)	// 没找到
+			return false;
+		// 找到overlay，移除
+		map.removeOverlay(overlay);
+		return true;
+	}
+
+
+	// 画出路线	// TODO: 路线规划
+	let track_id = "track";
+	function drawTrack(p1, p2){
+		let track = new BMapGL.Polyline([
+				p1,
+				p2
+			], {strokeColor:"green", strokeWeight:2, strokeOpacity:0.5});
+		track.id = track_id;
+		map.addOverlay(track);
+	}
+
+	// 定义右键菜单
+	let txtMenuItem = [
+	        {
+	            text:"放大",					// 定义菜单项的显示文本
+	            callback: function () {		// 定义菜单项点击触发的回调函数
+	                map.zoomIn();
+	            }
+	        },
+	        {
+	            text:"缩小",
+	            callback: function () {
+	                map.zoomOut();
+	            }
+	        },
+	        {
+	        	text:"设为起点",
+	        	callback: function() {
+	        		// 若标注、轨迹已存在则移除
+	        		removeOverlayByID(m_from_id);
+	        		removeOverlayByID(track_id);
+
+					// 起点标注
+					let m_from = new BMapGL.Marker(p_click, {
+						"enableDragging": true,
+						"icon": iconFrom
+					});
+					m_from.id = m_from_id;
+					
+					m_from.setLabel(new BMapGL.Label("起点"));
+					map.addOverlay(m_from);			// 在地图上添加标注
+
+					p_from =  m_from.getPosition();
+					// alert('【起点】经纬度：' + p_from.lng + ', ' + p_from.lat);
+
+					// 终点存在，则画线
+					if(findOverlayByID(m_to_id) != false)
+						drawTrack(p_from, p_to);
+	        	}
+	        },
+	        {
+	        	text:"设为终点",
+	        	callback: function() {
+	        		// 若标注、轨迹已存在则移除
+	        		removeOverlayByID(m_to_id);
+	        		removeOverlayByID(track_id);
+
+					// 终点标注
+					let m_to = new BMapGL.Marker(p_click, {
+						"enableDragging": true,
+						"icon": iconTo
+					});
+					m_to.id = m_to_id;
+					
+					m_to.setLabel(new BMapGL.Label("终点"));
+					map.addOverlay(m_to);			// 在地图上标注
+
+					p_to =  m_to.getPosition();
+					// alert('【终点】经纬度：' + p_to.lng + ', ' + p_to.lat);
+
+					// 起点存在，则画线
+					if(findOverlayByID(m_from_id) != false)
+						drawTrack(p_from, p_to);
+	        	}
+	        },
+	    ];
+
+	let menu = new BMapGL.ContextMenu();
+	for(let i = 0; i < txtMenuItem.length; i++){
+	    menu.addItem(new BMapGL.MenuItem(	// 定义菜单项实例
+	        txtMenuItem[i].text,			// 传入菜单项的显示文本
+	        txtMenuItem[i].callback,		// 传入菜单项的回调函数
+	        {
+	            width: 100,					// 指定菜单项的宽度
+	            id: 'menu' + i				// 指定菜单项dom的id
+	        }
+	    ));
+	}
+
+	// 给地图添加右键菜单
+	map.addContextMenu(menu);
+
 </script>
 
 {% endblock dash_app %}
