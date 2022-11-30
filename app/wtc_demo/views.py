@@ -6,6 +6,7 @@ from .forms import TableActForm, DeleteForm, ContentForm
 from app import db
 
 import app.utils.wutongchain as wtc
+import app.utils.myvessel as mvsl
 
 global status
 status = 0
@@ -33,10 +34,18 @@ def demotest(demoname):
 
 # 与梧桐链数据交互
 def HelloWTC():
+    port_list = {
+        "洋山港": "CNYSN",
+        "烟台港": "CNYAN",
+    }
+    # info_yangshan = 
+
     text_list = ["Hello Hello Hi Hi Hi",
         f"区块浏览器: {wtc.get_browser_url()}",
         f"应用链: {wtc.get_ledger_name()}",
         f"当前区块高度: {wtc.get_block_height()}",
+        f"洋山港: {mvsl.get_port_by_code(port_list['洋山港'])}",
+        f"烟台港: {mvsl.get_port_by_code(port_list['烟台港'])}",
         ]
 
     return render_template(

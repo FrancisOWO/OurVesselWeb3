@@ -31,13 +31,18 @@ API 	: /v2/block/height
 说明 	: 获取区块链的最新高度
 '''
 def get_block_height():
-	# url及参数
+	# url
 	url = f"{URL_PREFIX}/v2/block/height"
+
+	# GET 参数
 	params = {
 		"ledger": LEDGER
 	}
 	# 发送请求
 	res = requests.get(url=url, params=params)
+	if res.status_code != 200:
+		print(res)
+		return None
 	'''
 	res.request.headers	# 请求头
 	res.headers 		# 响应头
