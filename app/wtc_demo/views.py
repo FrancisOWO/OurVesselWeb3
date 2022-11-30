@@ -15,6 +15,7 @@ demolinks = [
     ['Hello 梧桐链！', 'hello'],
     ['用户信息', 'userinfo'],
     ["地图", "map"],
+    ["碳排放", "carbon"],
     ]
 
 @demo_bp.route('/test/<demoname>', methods=['GET','POST'])
@@ -28,6 +29,8 @@ def demotest(demoname):
         return TableUserInfo()
     elif demoname == 'map':       
         return redirect(url_for('map.hello_map'))
+    elif demoname == 'carbon':
+        return redirect(url_for('carbon.carbon_BaseInfo'))
     else:
         return redirect(url_for('account.panel'))
     
