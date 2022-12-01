@@ -84,12 +84,15 @@ def carbon_BaseInfo():
     }
     ship_cii_output_data = mvsl.get_shipCII_by_code(ship_cii_input_data)
     print(ship_cii_output_data)
-
+    main_ship = "中海才华"
     return render_template(
         "carbon_BaseInfo.html",
         title='碳排放基本信息',
         demolinks=demolinks,
         tabletitle="碳排放",
+        main_ship=main_ship,
         shipnames=Ship.keys(),
+        ship_info=ship_info,
+        ship_status=ship_status,
         # text_list=text_list,
     )

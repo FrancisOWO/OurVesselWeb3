@@ -20,7 +20,7 @@
                         <div class="easion-card-icon">
                             <i class="fas fa-ship"></i>
                         </div>
-                        <div class="easion-card-title"> {{ shipnames[0] }} </div>
+                        <div class="easion-card-title"> {{ main_ship }} </div>
                         <div class="easion-card-menu">
                             <div class="dropdown show">
                                 <a class="easion-card-menu-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -42,11 +42,11 @@
                                 <div class="stats stats-light">
 {#                                    <h3 class="stats-title"> 船舶信息 </h3>#}
                                     <ul class="list-unstyled">
-                                        <li> MMSI: 477464900</li>
-                                        <li> 载重吨: 315042</li>
-                                        <li> 长 * 宽: 330.0 x 57.0 m</li>
-                                        <li> 建成日期: 2013-01 </li>
-                                        <li> 设计吃水/航速: 22.1m/16.2kn </li>
+                                        <li> MMSI: {{ ship_info["mmsi"] }}</li>
+                                        <li> 载重吨: {{ ship_info["载重吨"] }}</li>
+                                        <li> 长 * 宽 * 高: {{ ship_info["length_width_height"] }}</li>
+                                        <li> 建成日期: {{ ship_info["buildYearMonth"] }} </li>
+                                        <li> 设计吃水/航速: {{ ship_info["draught_speed"] }} </li>
                                     </ul>
                                 </div>
                             </div>
@@ -54,7 +54,7 @@
                             <div class="col-lg-3">
                                 <div class="stats stats-light">
                                     <h3 class="stats-title"> 航行状态 </h3>
-                                    <p class="h4" align="center"> 马代拉角 → 马迹山 </p>
+                                    <p class="h4" align="center"> {{ship_status["legStartPortNameCn"]}}【{{ ship_status["legStartPortCtryCode"] }}】 → {{ship_status["legEndPortNameCn"]}}【{{ ship_status["legEndPortCtryCode"] }}】 </p>
                                     <div class="stats-content">
                                         <div class="stats-icon">
                                             <i class="fas fa-anchor"></i>
@@ -63,7 +63,7 @@
                                             <div class="stats-number" style="color: #1DAB47">航行中</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
-                                                <span class="stats-timeframe">2022.11.03 20:31启航</span>
+                                                <span class="stats-timeframe">{{ship_status["startPostime"]}}启航</span>
                                             </div>
                                         </div>
                                     </div>
