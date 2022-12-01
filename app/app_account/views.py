@@ -1,10 +1,10 @@
 from flask import render_template, flash, redirect, url_for
 from app import app, login
-from app.wtc_account import account_bp
+from app.app_account import account_bp
 from .models import *
 from .forms import RegisterForm, LoginForm, ChangePwdForm
 
-from app.wtc_demo import demolinks # 导航栏链接
+from app.app_demo import demolinks # 导航栏链接
 
 @login.user_loader
 def load_user():

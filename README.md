@@ -51,11 +51,11 @@ css，images，js，plugins
 
 各模块**公用的** html
 
-**4）app/wtc_account/**
+**4）app/app_account/**
 
 account 模块目录
 
-**5）app/wtc_demo/**
+**5）app/app_demo/**
 
 demo 模块目录
 

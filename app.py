@@ -1,6 +1,6 @@
 from app import app
-from app.wtc_account import account_bp
-from app.wtc_demo import demo_bp
+from app.app_account import account_bp
+from app.app_demo import demo_bp
 from app.app_map import map_bp
 from app.app_carbon import carbon_bp
 
