@@ -39,7 +39,7 @@
                         <div class="row">
 {#                            船舶信息        #}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
 {#                                    <h3 class="stats-title"> 船舶信息 </h3>#}
                                     <ul class="list-unstyled">
                                         <li> MMSI: {{ ship_info["mmsi"] }}</li>
@@ -52,9 +52,9 @@
                             </div>
 {#                            航行状态#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
                                     <h3 class="stats-title"> 航行状态 </h3>
-                                    <p class="h4" align="center"> {{ship_status["legStartPortNameCn"]}}【{{ ship_status["legStartPortCtryCode"] }}】 → {{ship_status["legEndPortNameCn"]}}【{{ ship_status["legEndPortCtryCode"] }}】 </p>
+                                    <p class="h4" align="center"> {{ship_status["legStartPortNameCn"]}}[{{ ship_status["legStartPortCtryCode"] }}] → {{ship_status["legEndPortNameCn"]}}[{{ ship_status["legEndPortCtryCode"] }}] </p>
                                     <div class="stats-content">
                                         <div class="stats-icon">
                                             <i class="fas fa-anchor"></i>
@@ -71,20 +71,27 @@
                             </div>
 {#                            本年度航行里程#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
                                     <h3 class="stats-title"> 本年度航行里程 </h3>
                                     <div class="stats-content">
                                         <div class="stats-icon">
                                             <i class="fas fa-anchor"></i>
                                         </div>
                                         <div class="stats-data">
-                                            <div class="stats-number">74654.59nm</div>
+                                            <div class="stats-number">{{ ship_sail_output_data["sailDistance"] }}</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
-                                                <span class="stats-timeframe">航行时间占 76.72%</span>
+{#                                                <span class="stats-timeframe">航行时间占 76.72%</span>#}
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+{#                            本年度航行里程#}
+                            <div class="col-lg-3">
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h3 class="stats-title"> 本年度航行时间 </h3>
+                                    <canvas id="easionChartjsDougnut" style="height: 100px"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -92,7 +99,7 @@
                         <div class="row">
 {#                            加油量#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
                                     <h3 class="stats-title"> 本年度加油量 </h3>
                                     <div class="stats-content">
                                         <div class="stats-icon">
@@ -102,7 +109,25 @@
                                             <div class="stats-number">13047吨</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
-                                                <span class="stats-timeframe">2022.11.29</span>
+                                                <span class="stats-timeframe">{{ ship_status["statusTime"] }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+{#                            燃油使用量#}
+                            <div class="col-lg-3">
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h3 class="stats-title"> 本年度燃油使用量 </h3>
+                                    <div class="stats-content">
+                                        <div class="stats-icon">
+                                            <i class="fas fa-gas-pump"></i>
+                                        </div>
+                                        <div class="stats-data">
+                                            <div class="stats-number">11567吨</div>
+                                            <div class="stats-change">
+{#                                                <span class="stats-percentage">+17.5%</span>#}
+                                                <span class="stats-timeframe">{{ ship_status["statusTime"] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -110,14 +135,14 @@
                             </div>
 {#                            碳排放额度#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
                                     <h3 class="stats-title"> 本年度碳排放额度 </h3>
                                     <div class="stats-content">
                                         <div class="stats-icon">
                                             <i class="fas fa-globe"></i>
                                         </div>
                                         <div class="stats-data">
-                                            <div class="stats-number">10000吨</div>
+                                            <div class="stats-number">24000吨</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
                                                 <span class="stats-timeframe">2022.1-2022.12</span>
@@ -127,7 +152,7 @@
                                 </div>
                             </div>
 {#                            累计碳排放#}
-                            <div class="col-lg-3">
+                            <div class="col-lg-3" style="height: 120px">
                                 <div class="stats stats-light">
                                     <h3 class="stats-title"> 本年度累计碳排放 </h3>
                                     <div class="stats-content">
@@ -135,10 +160,10 @@
                                             <i class="fas fa-globe"></i>
                                         </div>
                                         <div class="stats-data">
-                                            <div class="stats-number">7213.91吨</div>
+                                            <div class="stats-number">18753.5吨</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
-                                                <span class="stats-timeframe">2022.11.29</span>
+                                                <span class="stats-timeframe">{{ ship_status["statusTime"] }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -146,14 +171,14 @@
                             </div>
 {#                            碳排放冻结额度#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
                                     <h3 class="stats-title"> 碳排放冻结额度 </h3>
                                     <div class="stats-content">
                                         <div class="stats-icon">
                                             <i class="fas fa-globe"></i>
                                         </div>
                                         <div class="stats-data">
-                                            <div class="stats-number">1000吨</div>
+                                            <div class="stats-number">-1000吨</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
                                                 <span class="stats-timeframe">冻结时间：2022.11.29</span>
@@ -164,7 +189,7 @@
                             </div>
 {#                            交易量#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
                                     <h3 class="stats-title"> 碳排放交易量 </h3>
                                     <div class="stats-content">
                                         <div class="stats-icon">
@@ -182,14 +207,14 @@
                             </div>
 {#                            可用额度#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
                                     <h3 class="stats-title"> 可用额度 </h3>
                                     <div class="stats-content">
                                         <div class="stats-icon">
                                             <i class="fas fa-globe"></i>
                                         </div>
                                         <div class="stats-data">
-                                            <div class="stats-number">1786.09吨</div>
+                                            <div class="stats-number">4246.5吨</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
 {#                                                <span class="stats-timeframe">冻结时间：2022.11.29</span>#}
@@ -200,14 +225,14 @@
                             </div>
 {#                            CII#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
                                     <h3 class="stats-title"> CII </h3>
                                     <div class="stats-content">
                                         <div class="stats-icon">
                                             <i class="fas fa-globe"></i>
                                         </div>
                                         <div class="stats-data">
-                                            <div class="stats-number">2.36</div>
+                                            <div class="stats-number">{{ ship_cii_output_data["his"]["atSeaCiiRate"] }}</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
 {#                                                <span class="stats-timeframe">冻结时间：2022.11.29</span>#}
@@ -218,14 +243,14 @@
                             </div>
 {#                            CII Ranking#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
+                                <div class="stats stats-light" style="height: 120px">
                                     <h3 class="stats-title"> CII Ranking </h3>
                                     <div class="stats-content">
                                         <div class="stats-icon">
                                             <i class="fas fa-globe"></i>
                                         </div>
                                         <div class="stats-data">
-                                            <div class="stats-number" style="color: #dc3545">E</div>
+                                            <div class="stats-number" style="color: #dc3545">{{ ship_cii_output_data["his"]["atSeaCiiClass"] }}</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
 {#                                                <span class="stats-timeframe">冻结时间：2022.11.29</span>#}
@@ -237,148 +262,83 @@
                         </div>
                         <h3> 航段分析与建议 </h3>
                         <div class="row">
+{#                            航段里程#}
+                            <div class="col-lg-3">
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h3 class="stats-title"> 本航段里程分析 </h3>
+                                    <p style="float: left; "> 总里程：{{ ship_status["legDistance"] }} kn</p>
+                                    <p style="float: left; "> 已行驶里程：{{ ship_status["pastDistance"] }} kn</p>
+                                    <p style="float: left; "> 剩余里程：{{ ship_status["restDistance"] }} kn</p>
+                                    <canvas id="sailDistance" style="margin-left: 90px; height: 100px; margin-top:-143px"></canvas>
+                                </div>
+                            </div>
+{#                            碳排放和油耗#}
+                            <div class="col-lg-3">
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h3 class="stats-title"> 已行驶航段油耗和碳排放量 </h3>
+                                    <div class="stats-content">
+                                        <p style="font-size: 24px"> 油耗量: {{ ship_carbon_output_data["fuel_sum"] }} 吨
+                                            <br> 碳排放量：{{ ship_carbon_output_data["carbon_sum"] }} 吨 </p>
+                                    </div>
+                                </div>
+                            </div>
+{#                            建议航速#}
+                            <div class="col-lg-3">
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h5 class="stats-title"> 剩余航程建议航速: </h5>
+                                    <h5 class="stats-title" align="center">10.35-13.52kn</h5>
+                                    <ul class="list-unstyled">
+                                        <li style="float: left"> CII预测: <b>2.01 ↓</b></li>
+                                        <li style="float: right"> CII Ranking预测: <b>C ↑</b></li>
+                                        <li style="clear: both"> 油耗预测：<b>{{ ship_carbon_output_data["fuel_predict_sum"]  }}吨</b></li>
+                                        <li style="clear: both"> 碳排放预测：<b>{{ ship_carbon_output_data["carbon_predict_sum"]  }}吨</b></li>
+                                    </ul>
+                                </div>
+                            </div>
 {#                            预抵时间#}
                             <div class="col-lg-3">
-                                <div class="stats stats-light">
-                                    <h3 class="stats-title"> 预抵时间 </h3>
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h3 class="stats-title"> 预抵时间: </h3>
+                                    <h5 class="stats-title" align="center"> {{ ship_status["legEndTime"] }} </h5>
                                     <div class="stats-content">
-                                        <div class="stats-icon">
-                                            <i class="fas fa-arrow-right"></i>
-                                        </div>
-                                        <div class="stats-data">
-                                            <div class="stats-number">2022.12.21</div>
-                                            <div class="stats-change">
-{#                                                <span class="stats-percentage">+17.5%</span>#}
-{#                                                <span class="stats-timeframe">2022.11.29</span>#}
-                                            </div>
-                                        </div>
+                                        <p style="font-size: 16px">
+                                            平均油耗变化：<b style="font-size: 24px">{{ ship_carbon_output_data["fuel_change"]  }}</b>吨/百海里
+                                            <br>
+                                            平均碳排放变化：<b style="font-size: 24px">{{ ship_carbon_output_data["carbon_change"]  }}</b>吨/百海里
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-{#                            碳排放额度#}
-                            <div class="col-lg-3">
-                                <div class="stats stats-light">
-                                    <h3 class="stats-title"> 本年度碳排放额度 </h3>
-                                    <div class="stats-content">
-                                        <div class="stats-icon">
-                                            <i class="fas fa-globe"></i>
-                                        </div>
-                                        <div class="stats-data">
-                                            <div class="stats-number">10000吨</div>
-                                            <div class="stats-change">
-{#                                                <span class="stats-percentage">+17.5%</span>#}
-                                                <span class="stats-timeframe">2022.1-2022.12</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                        </div>
+                        <div class="row">
+{#                            每日油耗量#}
+                            <div class="col-lg-6">
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h5 class="stats-title"> 已行驶航段每日油耗量(单位:吨) </h5>
+                                    <canvas id="fuelDataLine" style="height: 120px"></canvas>
                                 </div>
                             </div>
-{#                            累计碳排放#}
-                            <div class="col-lg-3">
-                                <div class="stats stats-light">
-                                    <h3 class="stats-title"> 本年度累计碳排放 </h3>
-                                    <div class="stats-content">
-                                        <div class="stats-icon">
-                                            <i class="fas fa-globe"></i>
-                                        </div>
-                                        <div class="stats-data">
-                                            <div class="stats-number">7213.91吨</div>
-                                            <div class="stats-change">
-{#                                                <span class="stats-percentage">+17.5%</span>#}
-                                                <span class="stats-timeframe">2022.11.29</span>
-                                            </div>
-                                        </div>
-                                    </div>
+{#                            预测每日油耗量#}
+                            <div class="col-lg-6">
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h5 class="stats-title"> 剩余航段每日油耗量预测(单位:吨) </h5>
+                                    <canvas id="fuelDataPredictLine" style="height: 120px"></canvas>
                                 </div>
                             </div>
-{#                            碳排放冻结额度#}
-                            <div class="col-lg-3">
-                                <div class="stats stats-light">
-                                    <h3 class="stats-title"> 碳排放冻结额度 </h3>
-                                    <div class="stats-content">
-                                        <div class="stats-icon">
-                                            <i class="fas fa-globe"></i>
-                                        </div>
-                                        <div class="stats-data">
-                                            <div class="stats-number">1000吨</div>
-                                            <div class="stats-change">
-{#                                                <span class="stats-percentage">+17.5%</span>#}
-                                                <span class="stats-timeframe">冻结时间：2022.11.29</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                        </div>
+                        <div class="row">
+{#                            每日碳排放#}
+                            <div class="col-lg-6">
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h5 class="stats-title"> 已行驶航段每日碳排放量(单位:吨) </h5>
+                                    <canvas id="carbonDataLine" style="height: 120px"></canvas>
                                 </div>
                             </div>
-{#                            交易量#}
-                            <div class="col-lg-3">
-                                <div class="stats stats-light">
-                                    <h3 class="stats-title"> 碳排放交易量 </h3>
-                                    <div class="stats-content">
-                                        <div class="stats-icon">
-                                            <i class="fas fa-globe"></i>
-                                        </div>
-                                        <div class="stats-data">
-                                            <div class="stats-number">+0吨</div>
-                                            <div class="stats-change">
-{#                                                <span class="stats-percentage">+17.5%</span>#}
-{#                                                <span class="stats-timeframe">冻结时间：2022.11.29</span>#}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-{#                            可用额度#}
-                            <div class="col-lg-3">
-                                <div class="stats stats-light">
-                                    <h3 class="stats-title"> 可用额度 </h3>
-                                    <div class="stats-content">
-                                        <div class="stats-icon">
-                                            <i class="fas fa-globe"></i>
-                                        </div>
-                                        <div class="stats-data">
-                                            <div class="stats-number">1786.09吨</div>
-                                            <div class="stats-change">
-{#                                                <span class="stats-percentage">+17.5%</span>#}
-{#                                                <span class="stats-timeframe">冻结时间：2022.11.29</span>#}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-{#                            CII#}
-                            <div class="col-lg-3">
-                                <div class="stats stats-light">
-                                    <h3 class="stats-title"> CII </h3>
-                                    <div class="stats-content">
-                                        <div class="stats-icon">
-                                            <i class="fas fa-globe"></i>
-                                        </div>
-                                        <div class="stats-data">
-                                            <div class="stats-number">2.36</div>
-                                            <div class="stats-change">
-{#                                                <span class="stats-percentage">+17.5%</span>#}
-{#                                                <span class="stats-timeframe">冻结时间：2022.11.29</span>#}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-{#                            CII Ranking#}
-                            <div class="col-lg-3">
-                                <div class="stats stats-light">
-                                    <h3 class="stats-title"> CII Ranking </h3>
-                                    <div class="stats-content">
-                                        <div class="stats-icon">
-                                            <i class="fas fa-globe"></i>
-                                        </div>
-                                        <div class="stats-data">
-                                            <div class="stats-number" style="color: #dc3545">E</div>
-                                            <div class="stats-change">
-{#                                                <span class="stats-percentage">+17.5%</span>#}
-{#                                                <span class="stats-timeframe">冻结时间：2022.11.29</span>#}
-                                            </div>
-                                        </div>
-                                    </div>
+{#                            预测每日碳排放#}
+                            <div class="col-lg-6">
+                                <div class="stats stats-light" style="height: 120px">
+                                    <h5 class="stats-title"> 剩余航段每日碳排放量预测(单位:吨) </h5>
+                                    <canvas id="carbonDataPredictLine" style="height: 120px"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -396,3 +356,167 @@
 	</div>
 </main>
 {% endblock dash_app %}
+
+{% block myjavascript %}
+    <script>
+        var ctx = document.getElementById("easionChartjsDougnut").getContext('2d');
+        {#var first_height =  document.getElementById("first").offsetHeight#}
+        var sailRate = {{ ship_sail_output_data["sailRate"] }};
+        var moorDurationPortRate = {{ ship_sail_output_data["moorDurationPortRate"] }};
+        var berthRate = {{ ship_sail_output_data["berthRate"] }};
+        var sailDuration ="本年度航行时长:" + "{{ ship_sail_output_data["sailDuration"] }}" + "," + "占比";
+        var moorDurationPort ="本年度锚泊时长:" + "{{ ship_sail_output_data["moorDurationPort"] }}" + "," + "占比";
+        var berthDuration = "本年度靠泊时长:" + "{{ ship_sail_output_data["berthDuration"] }}" + "," + "占比";
+        var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [sailDuration, moorDurationPort, berthDuration],
+                datasets: [{
+                    label: 'SailTime',
+                    data: [sailRate, moorDurationPortRate, berthRate],
+                    backgroundColor: [
+                        window.chartColors.success,
+                        window.chartColors.primary,
+                        window.chartColors.danger,
+                    ],
+                    borderColor: '#fff',
+                    fill: false
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                }
+            }
+        });
+    </script>
+    <script>
+        var ctx = document.getElementById("sailDistance").getContext('2d');
+        {#var first_height =  document.getElementById("first").offsetHeight#}
+        {#var sailRate = {{ ship_status["legDistance"] }};#}
+        var pastDistance = {{ ship_status["pastDistance"] }};
+        var restDistance = {{ ship_status["restDistance"] }};
+
+        var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ["已航行距离(kn)", "剩余距离(kn)"],
+                datasets: [{
+                    label: 'SailTime',
+                    data: [pastDistance, restDistance],
+                    backgroundColor: [
+                        window.chartColors.success,
+                        window.chartColors.primary,
+                    ],
+                    borderColor: '#fff',
+                    fill: false
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                }
+            }
+        });
+    </script>
+    <script>
+        var ctx = document.getElementById("fuelDataLine").getContext('2d');
+        var labels = []
+        {% for date in ship_carbon_output_data["date"] %}
+        labels.push("{{ date }}")
+        {% endfor %}
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '油耗量',
+                    data: {{ ship_carbon_output_data["fuel_data"] }},
+                    backgroundColor: window.chartColors.primary,
+                    borderColor: window.chartColors.primary,
+                    fill: false
+                }]
+            },
+            options: {
+                legend: {
+                    display: false,
+                },
+            },
+        });
+    </script>
+    <script>
+        var ctx = document.getElementById("fuelDataPredictLine").getContext('2d');
+        var labels = []
+        {% for date in ship_carbon_output_data["date_predict"] %}
+        labels.push("{{ date }}")
+        {% endfor %}
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '油耗量',
+                    data: {{ ship_carbon_output_data["fuel_data_predict"] }},
+                    backgroundColor: window.chartColors.primary,
+                    borderColor: window.chartColors.primary,
+                    fill: false
+                }]
+            },
+            options: {
+                legend: {
+                    display: false,
+                },
+            },
+        });
+    </script>
+    <script>
+        var ctx = document.getElementById("carbonDataLine").getContext('2d');
+        var labels = []
+        {% for date in ship_carbon_output_data["date"] %}
+        labels.push("{{ date }}")
+        {% endfor %}
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '碳排放量',
+                    data: {{ ship_carbon_output_data["carbon_data"] }},
+                    backgroundColor: window.chartColors.primary,
+                    borderColor: window.chartColors.primary,
+                    fill: false
+                }]
+            },
+            options: {
+                legend: {
+                    display: false,
+                },
+            },
+        });
+    </script>
+    <script>
+        var ctx = document.getElementById("carbonDataPredictLine").getContext('2d');
+        var labels = []
+        {% for date in ship_carbon_output_data["date_predict"] %}
+        labels.push("{{ date }}")
+        {% endfor %}
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '碳排放量',
+                    data: {{ ship_carbon_output_data["carbon_data_predict"] }},
+                    backgroundColor: window.chartColors.primary,
+                    borderColor: window.chartColors.primary,
+                    fill: false
+                }]
+            },
+            options: {
+                legend: {
+                    display: false,
+                },
+            },
+        });
+    </script>
+{% endblock myjavascript %}

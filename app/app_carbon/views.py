@@ -6,6 +6,7 @@ from .forms import *
 
 from app.wtc_demo import demolinks  # 导航栏链接
 import app.utils.myvessel as mvsl
+import json
 
 
 # @carbon_bp.route('/carbon', methods=['GET', 'POST'])
@@ -64,6 +65,12 @@ def carbon_BaseInfo():
         }
     }
     ship_carbon_output_data = mvsl.get_shipCarbon_by_code(ship_carbon_input_data)
+    ship_carbon_output_data["carbon_sum"] = format(sum(ship_carbon_output_data["carbon_data"]), '.2f')
+    ship_carbon_output_data["carbon_predict_sum"] = format(sum(ship_carbon_output_data["carbon_data_predict"]), '.2f')
+    ship_carbon_output_data["fuel_sum"] = format(sum(ship_carbon_output_data["fuel_data"]), '.2f')
+    ship_carbon_output_data["fuel_predict_sum"] = format(sum(ship_carbon_output_data["fuel_data_predict"]), '.2f')
+    # ship_carbon_output_data["carbon_change"] = format((float(ship_carbon_output_data["carbon_predict_sum"]) / ship_status["restDistance"]) - (float(ship_carbon_output_data["carbon_sum"]) / ship_status["pastDistance"]), '.2f')
+
     #   获取船舶CII数据
     ship_cii_input_data = {
         "mmsi": ship_info["mmsi"],
@@ -83,7 +90,15 @@ def carbon_BaseInfo():
         },
     }
     ship_cii_output_data = mvsl.get_shipCII_by_code(ship_cii_input_data)
-    print(ship_cii_output_data)
+
+    #   获取船航行数据
+    ship_sail_input_data = {
+        "mmsiList": [ship_info["mmsi"]],
+        "endYearMonth": "202212",
+        "startYearMonth": "202201",
+        "cascadeType": 0,
+    }
+    ship_sail_output_data = mvsl.get_shipSailData_by_code(ship_sail_input_data)
     main_ship = "中海才华"
     return render_template(
         "carbon_BaseInfo.html",
@@ -94,5 +109,10 @@ def carbon_BaseInfo():
         shipnames=Ship.keys(),
         ship_info=ship_info,
         ship_status=ship_status,
+        ship_sail_output_data=ship_sail_output_data,
+        ship_cii_output_data=ship_cii_output_data,
+        ship_carbon_output_data=ship_carbon_output_data,
         # text_list=text_list,
     )
+
+

@@ -152,7 +152,7 @@ def get_shipStatus_by_code(ship_mmsi):
 
     res_dict = res.json()["data"]
 
-    my_dict = {
+    ship_status = {
         "mmsi": res_dict["mmsi"],  # 船舶mmsi
         "statusTime": res_dict["statusTime"],
         "startPostime": res_dict["startPostime"],
@@ -174,9 +174,9 @@ def get_shipStatus_by_code(ship_mmsi):
             int(res_dict["delayDurationAvg"] % 24)) + 'h',
         "pastDuration": str(int(res_dict["pastDuration"] / 24)) + 'd' + str(int(res_dict["pastDuration"] % 24)) + 'h',
         "restDuration": str(int(res_dict["restDuration"] / 24)) + 'd' + str(int(res_dict["restDuration"] % 24)) + 'h',
-        "legDistance": str(res_dict["legDistance"]) + "nm",
-        "pastDistance": str(res_dict["pastDistance"]) + "nm",
-        "restDistance": str(res_dict["restDistance"]) + "nm",
+        "legDistance": res_dict["legDistance"],
+        "pastDistance": res_dict["pastDistance"],
+        "restDistance": res_dict["restDistance"],
         "sailPct": str(format(res_dict["sailPct"] * 100, '.1f')) + "%",
         "currentSpeed": str(res_dict["currentSpeed"]) + "kn",
         "averageSpeed": str(res_dict["averageSpeed"]) + "kn",
@@ -185,7 +185,7 @@ def get_shipStatus_by_code(ship_mmsi):
         "dailyCo2Total": res_dict["dailyCo2Total"],
         "calculateSpeed": res_dict["calculateSpeed"],
     }
-    return my_dict
+    return ship_status
 
 
 '''
@@ -271,14 +271,43 @@ def get_shipCarbon_by_code(data):
         print(res)
         return None
     res_dict = res.json()["data"]
-
-    return res_dict
+    if not res_dict:
+        return None
+    ship_carbon_output_data = {
+        "date": [],
+        "carbon_data": [],
+        "fuel_data": [],
+        "date_predict": [],
+        "carbon_data_predict": [],
+        "fuel_data_predict": [],
+    }
+    fuel_hundred_ais_total = 0
+    fuel_hundred_ais_total_co2 = 0
+    fuel_hundred_ais_total_co2_predict = 0
+    fuel_hundred_ais_total_predict = 0
+    for data in res_dict:
+        if data["isPredict"]:
+            ship_carbon_output_data["date_predict"].append(str(data["inputDate"][5:10]))
+            ship_carbon_output_data["carbon_data_predict"].append(data["dailyFuelAisCo2"])
+            ship_carbon_output_data["fuel_data_predict"].append(data["dailyFuelAis"])
+            fuel_hundred_ais_total_co2_predict = data["fuelTermHundredAisTotalCo2"]
+            fuel_hundred_ais_total_predict = data["fuelTermHundredAisTotal"]
+        else:
+            ship_carbon_output_data["date"].append(data["inputDate"][5:10])
+            ship_carbon_output_data["carbon_data"].append(data["dailyFuelAisCo2"])
+            ship_carbon_output_data["fuel_data"].append(data["dailyFuelAis"])
+            fuel_hundred_ais_total_co2 = data["fuelTermHundredAisTotalCo2"]
+            fuel_hundred_ais_total = data["fuelTermHundredAisTotal"]
+    ship_carbon_output_data["carbon_change"] = format(fuel_hundred_ais_total_co2_predict - fuel_hundred_ais_total_co2, '.2f')
+    ship_carbon_output_data["fuel_change"] = format(fuel_hundred_ais_total_predict - fuel_hundred_ais_total,
+                                                      '.2f')
+    return ship_carbon_output_data
 
 
 '''
 API 	: sdc/v1/bi/simulator/cii/leg
 请求方式	: POST
-说明 	: 获取船舶航行碳排放等数据
+说明 	: 获取船舶航行CII数据
 返回
 '''
 
@@ -300,3 +329,46 @@ def get_shipCII_by_code(data):
     res_dict = res.json()["data"]
 
     return res_dict
+
+
+'''
+API 	: sdc/v1/vessels/analytics/efficiency/batch
+请求方式	: POST
+说明 	: 获取船舶航行数据
+返回
+sailDistance    : 本年度航行距离
+sailDuration    ：本年度航行时间
+moorDurationPort    ：本年度锚泊时长
+berthDuration   ：本年度靠泊时长
+sailRate    ：航行时间占比
+moorDurationPortRate    ：锚泊时长占比
+
+'''
+
+
+def get_shipSailData_by_code(data):
+    # url
+    url = f"{URL_PREFIX}/sdc/v1/vessels/analytics/efficiency/batch"
+    # 请求头：没有【User-Agent】会返回405
+    headers = {
+        'Content-Type': 'application/json',
+        "User-Agent": "PostmanRuntime/7.29.2",
+        "Authorization": HEADER_AUTHORIZATION
+    }
+    # 发送请求
+    res = requests.post(url=url, data=json.dumps(data), headers=headers)
+    if res.status_code != 200:
+        print(res)
+        return None
+    res_dict = res.json()["data"]
+    my_dict = {
+        "sailDistance": res_dict["sailDistance"],
+        "sailDuration": str(int(res_dict["sailDuration"] / 24)) + 'd' + str(int(res_dict["sailDuration"] % 24)) + 'h',
+        "moorDurationPort": str(int((res_dict["moorDurationPort"] + + res_dict["moorDurationHalfway"]) / 24)) + 'd' + str(int((res_dict["moorDurationPort"] + res_dict["moorDurationHalfway"]) % 24)) + 'h',
+        "berthDuration": str(int(res_dict["berthDuration"] / 24)) + 'd' + str(int(res_dict["berthDuration"] % 24)) + 'h',
+        "sailRate": format(float(res_dict["sailRate"][:-1]) / 100, '.2f'),
+        "moorDurationPortRate": format((float(res_dict["moorDurationPortRate"][:-1]) + float(res_dict["moorDurationHalfwayRate"][:-1])) / 100, '.2f'),
+        "berthRate": format(float(res_dict["berthRate"][:-1]) / 100, '.2f'),
+        "avgSpeed": res_dict["avgSpeed"],
+    }
+    return my_dict
