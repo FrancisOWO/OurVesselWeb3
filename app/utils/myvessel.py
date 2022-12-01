@@ -246,3 +246,57 @@ def get_shipTrackPredict_by_code(data):
     for lon_lat in res_dict:
         lon_lat_list.append(str(lon_lat["lon"]) + " " + str(lon_lat["lat"]))
     return lon_lat_list
+
+
+'''
+API 	: sdc/v1/bi/lcdaily/stats/his
+请求方式	: POST
+说明 	: 获取船舶航行碳排放等数据
+返回
+'''
+
+
+def get_shipCarbon_by_code(data):
+    # url
+    url = f"{URL_PREFIX}/sdc/v1/bi/lcdaily/stats/his"
+    # 请求头：没有【User-Agent】会返回405
+    headers = {
+        'Content-Type': 'application/json',
+        "User-Agent": "PostmanRuntime/7.29.2",
+        "Authorization": HEADER_AUTHORIZATION
+    }
+    # 发送请求
+    res = requests.post(url=url, data=json.dumps(data), headers=headers)
+    if res.status_code != 200:
+        print(res)
+        return None
+    res_dict = res.json()["data"]
+
+    return res_dict
+
+
+'''
+API 	: sdc/v1/bi/simulator/cii/leg
+请求方式	: POST
+说明 	: 获取船舶航行碳排放等数据
+返回
+'''
+
+
+def get_shipCII_by_code(data):
+    # url
+    url = f"{URL_PREFIX}/sdc/v1/bi/simulator/cii/leg"
+    # 请求头：没有【User-Agent】会返回405
+    headers = {
+        'Content-Type': 'application/json',
+        "User-Agent": "PostmanRuntime/7.29.2",
+        "Authorization": HEADER_AUTHORIZATION
+    }
+    # 发送请求
+    res = requests.post(url=url, data=json.dumps(data), headers=headers)
+    if res.status_code != 200:
+        print(res)
+        return None
+    res_dict = res.json()["data"]
+
+    return res_dict

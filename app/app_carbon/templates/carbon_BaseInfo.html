@@ -20,14 +20,15 @@
                         <div class="easion-card-icon">
                             <i class="fas fa-ship"></i>
                         </div>
-                        <div class="easion-card-title"> 中海才华 </div>
+                        <div class="easion-card-title"> {{ shipnames[0] }} </div>
                         <div class="easion-card-menu">
                             <div class="dropdown show">
                                 <a class="easion-card-menu-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
-                                    <a class="dropdown-item" href="#">中海才华</a>
-                                    <a class="dropdown-item" href="#">中海海王星</a>
+                                    {% for name in shipnames %}
+                                    <a class="dropdown-item" href="#">{{ name }}</a>
+                                    {% endfor %}
 {#                                    <a class="dropdown-item" href="#">Something else here</a>#}
                                 </div>
                             </div>
