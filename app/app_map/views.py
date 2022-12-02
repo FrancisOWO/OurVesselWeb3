@@ -4,7 +4,7 @@ from app.app_map import map_bp
 from .models import *
 from .forms import *
 
-from app.wtc_demo import demolinks # 导航栏链接
+from app.app_demo import demolinks # 导航栏链接
 from app.utils.config import ak
 
 @map_bp.route('/helloMap', methods=['GET','POST'])

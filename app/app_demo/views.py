@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash, request
-from app.wtc_demo import demo_bp
+from app.app_demo import demo_bp
 from .models import *
-from app.wtc_account.models import User
+from app.app_account.models import User
 from .forms import TableActForm, DeleteForm, ContentForm
 from app import db
 

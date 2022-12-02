@@ -4,19 +4,9 @@ from app.app_carbon import carbon_bp
 from .models import *
 from .forms import *
 
-from app.wtc_demo import demolinks  # 导航栏链接
+from app.app_demo import demolinks  # 导航栏链接
 import app.utils.myvessel as mvsl
 import json
-
-
-# @carbon_bp.route('/carbon', methods=['GET', 'POST'])
-# def hello_map():
-#     return render_template(
-#         "helloMap.html",
-#         title="地图示例",
-#         ak=ak,
-#         demolinks=demolinks,
-#     )
 
 Ship = {
     "中海才华": 477464900,
@@ -27,78 +17,101 @@ Ship = {
 def carbon_BaseInfo():
     ship_info = mvsl.get_shipInfo_by_code(Ship["中海才华"])
     ship_status = mvsl.get_shipStatus_by_code(Ship["中海才华"])
-    # 获取船舶历史轨迹数据
-    ship_track_input_data = {
-        "mmsi": ship_info["mmsi"],
-        "startTime": ship_status["startPostime"],
-        "endTime": ship_status["statusTime"],
-        "sparse": 1,
-        "withWeather": 0,
-    }
-    # print(mvsl.get_shipStatus_by_code(Ship["中海才华"]))
-    ship_track_output_data = mvsl.get_shipTrack_by_code(ship_track_input_data)
-    string_track = ship_track_output_data[0]
-    for i in range(1, len(ship_track_output_data)):
-        string_track = string_track + "," + ship_track_output_data[i]
-    # 获取船舶预测轨迹
-    ship_track_predict_input_data = {
-        "mmsi": ship_info["mmsi"],
-        "dest": ship_status["legEndPortCode"],
-        "speed": ship_status["calculateSpeed"],
-        "softLink": True,
-    }
-    ship_track_predict_output_data = mvsl.get_shipTrackPredict_by_code(ship_track_predict_input_data)
-    string_track_predict = ship_track_predict_output_data[0]
-    for i in range(1, len(ship_track_predict_output_data)):
-        string_track_predict = string_track_predict + "," + ship_track_predict_output_data[i]
-    #   获取船舶碳排放数据
-    ship_carbon_input_data = {
-        "mmsi": ship_info["mmsi"],
-        "startTime": ship_status["startPostime"],
-        "endTime": ship_status["statusTime"],
-        "predict": {
-            "mmsi": ship_info["mmsi"],
-            "startTime": ship_status["statusTime"],
-            "endTime": ship_status["legEndTime"],
-            "isFullLoad": ship_status["isFullLoad"],
-            "lineString": string_track_predict,
-        }
-    }
-    ship_carbon_output_data = mvsl.get_shipCarbon_by_code(ship_carbon_input_data)
-    ship_carbon_output_data["carbon_sum"] = format(sum(ship_carbon_output_data["carbon_data"]), '.2f')
-    ship_carbon_output_data["carbon_predict_sum"] = format(sum(ship_carbon_output_data["carbon_data_predict"]), '.2f')
-    ship_carbon_output_data["fuel_sum"] = format(sum(ship_carbon_output_data["fuel_data"]), '.2f')
-    ship_carbon_output_data["fuel_predict_sum"] = format(sum(ship_carbon_output_data["fuel_data_predict"]), '.2f')
-    # ship_carbon_output_data["carbon_change"] = format((float(ship_carbon_output_data["carbon_predict_sum"]) / ship_status["restDistance"]) - (float(ship_carbon_output_data["carbon_sum"]) / ship_status["pastDistance"]), '.2f')
+    
+    # 要判断返回是否为 None，再进行下一步！！！
+    ok_flag = (ship_info != None and ship_status != None)
 
-    #   获取船舶CII数据
-    ship_cii_input_data = {
-        "mmsi": ship_info["mmsi"],
-        "his": {
+    ship_track_output_data = {}
+    if ok_flag:
+        # 获取船舶历史轨迹数据
+        ship_track_input_data = {
+            "mmsi": ship_info["mmsi"],
             "startTime": ship_status["startPostime"],
             "endTime": ship_status["statusTime"],
-            "fullLoad": ship_status["isFullLoad"],
-            "inPortDays": 0,
-            "lineString": string_track_predict,
-        },
-        "predict": {
-            "startTime": ship_status["statusTime"],
-            "endTime": ship_status["legEndTime"],
-            "fullLoad": ship_status["isFullLoad"],
-            "inPortDays": 0,
-            "lineString": string_track_predict,
-        },
-    }
-    ship_cii_output_data = mvsl.get_shipCII_by_code(ship_cii_input_data)
+            "sparse": 1,
+            "withWeather": 0,
+        }
 
-    #   获取船航行数据
-    ship_sail_input_data = {
-        "mmsiList": [ship_info["mmsi"]],
-        "endYearMonth": "202212",
-        "startYearMonth": "202201",
-        "cascadeType": 0,
-    }
-    ship_sail_output_data = mvsl.get_shipSailData_by_code(ship_sail_input_data)
+        # print(mvsl.get_shipStatus_by_code(Ship["中海才华"]))
+        ship_track_output_data = mvsl.get_shipTrack_by_code(ship_track_input_data)
+        ok_flag = (ship_track_output_data != None)
+
+    ship_track_predict_output_data = {}
+    if ok_flag:
+        string_track = ship_track_output_data[0]
+        for i in range(1, len(ship_track_output_data)):
+            string_track = string_track + "," + ship_track_output_data[i]
+
+        # 获取船舶预测轨迹
+        ship_track_predict_input_data = {
+            "mmsi": ship_info["mmsi"],
+            "dest": ship_status["legEndPortCode"],
+            "speed": ship_status["calculateSpeed"],
+            "softLink": True,
+        }
+        ship_track_predict_output_data = mvsl.get_shipTrackPredict_by_code(ship_track_predict_input_data)        
+        ok_flag = (ship_track_predict_output_data != None)
+
+    ship_carbon_output_data = {}
+    string_track_predict = ""
+    if ok_flag:
+        string_track_predict = ship_track_predict_output_data[0]
+        for i in range(1, len(ship_track_predict_output_data)):
+            string_track_predict = string_track_predict + "," + ship_track_predict_output_data[i]
+
+        # 获取船舶碳排放数据
+        ship_carbon_input_data = {
+            "mmsi": ship_info["mmsi"],
+            "startTime": ship_status["startPostime"],
+            "endTime": ship_status["statusTime"],
+            "predict": {
+                "mmsi": ship_info["mmsi"],
+                "startTime": ship_status["statusTime"],
+                "endTime": ship_status["legEndTime"],
+                "isFullLoad": ship_status["isFullLoad"],
+                "lineString": string_track_predict,
+            }
+        }
+        ship_carbon_output_data = mvsl.get_shipCarbon_by_code(ship_carbon_input_data)
+        ok_flag = (ship_carbon_output_data != None)
+
+    ship_cii_output_data = {}
+    if ok_flag:
+        # 获取船舶CII数据
+        ship_cii_input_data = {
+            "mmsi": ship_info["mmsi"],
+            "his": {
+                "startTime": ship_status["startPostime"],
+                "endTime": ship_status["statusTime"],
+                "fullLoad": ship_status["isFullLoad"],
+                "inPortDays": 0,
+                "lineString": string_track_predict,
+            },
+            "predict": {
+                "startTime": ship_status["statusTime"],
+                "endTime": ship_status["legEndTime"],
+                "fullLoad": ship_status["isFullLoad"],
+                "inPortDays": 0,
+                "lineString": string_track_predict,
+            },
+        }
+        ship_cii_output_data = mvsl.get_shipCII_by_code(ship_cii_input_data)
+        ok_flag = (ship_cii_output_data != None)
+
+    ship_sail_output_data = {}
+    if ok_flag:
+        #   获取船航行数据
+        ship_sail_input_data = {
+            "mmsiList": [ship_info["mmsi"]],
+            "endYearMonth": "202212",
+            "startYearMonth": "202201",
+            "cascadeType": 0,
+        }
+        ship_sail_output_data = mvsl.get_shipSailData_by_code(ship_sail_input_data)
+        ok_flag = (ship_sail_output_data != None)
+
+
+
     main_ship = "中海才华"
     return render_template(
         "carbon_BaseInfo.html",
