@@ -1,0 +1,78 @@
+    //碳交易合约
+    contract CarbonTransaction {
+        
+        //初始化一个账户
+        public string init_account(){
+            string[] name = {"477464900","477598400"}
+            string A_frozen = name[0] + "_frozen"
+            string B_frozen = name[1] + "_frozen"
+            float balA = 24000
+            float balB = 28000
+            db_set(name[0],balA)
+            db_set(name[1],balB)
+            db_set(A_frozen,0)
+            db_set(B_frozen,0)
+            float k = getBlance(name[0])
+            print(k)
+            return "success"
+        }
+        
+        //转账操作
+        public string transfer(string from, string to, float amount) {
+            float balA = db_get<float>(from)
+            float balB = db_get<float>(to)
+            balA = balA-amount
+            if (balA>0){
+                balB = balB+amount
+                db_set(from, balA)
+                db_set(to, balB)
+            }else{
+                return "failed"
+            }
+            return "success"
+        }
+    
+        //查询账户余额
+        public float getBlance(string account){
+            print(account)
+            float a = db_get<float>(account)
+            return a
+        }
+        
+        
+        // 增减
+        public string changeBlance(string account, float amount){
+            float blance = db_get<float>(account)
+            blance = blance + amount
+            if (blance < 0){
+                return "failed"
+            }
+            else{
+                db_set(account, blance)
+                return "success"
+            }
+        }
+        
+        // 冻结
+        public string frozenBlance(string account, float amount){
+            if (amount < 0)
+            {
+                return "success"
+            }
+            else{
+                string accountfrozen = account + "_frozen"
+                float blance = db_get<float>(account)
+                float blance_frozen = db_get<float>(accountfrozen)
+                blance = blance - amount
+                if (blance < 0){
+                    return "failed"
+                }
+                else{
+                    db_set(account, blance)
+                    blance_frozen = blance_frozen + amount
+                    db_set(accountfrozen, blance_frozen)
+                    return "success"
+                }  
+            }
+        }
+    }

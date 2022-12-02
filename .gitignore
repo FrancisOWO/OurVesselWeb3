@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # config
-app/utils/config.py
+/app/utils/config.py

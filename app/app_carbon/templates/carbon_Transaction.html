@@ -1,0 +1,162 @@
+{% extends "dash.html" %}
+
+{% block dash_app %}
+<main class="dash-content">
+	<div class="container-fluid">
+		<div class="container">
+		{% with messages = get_flashed_messages() %}
+			{% for message in messages %}
+				{% if message %}
+					<div class="alert alert-info">{{ message }}</div>
+				{% endif %}
+			{% endfor %}
+		{% endwith %}
+		</div>
+        <h3 class="dash-title"> 碳交易 </h3>
+        <div class="row">
+            <div class="col-12">
+            <div class="card easion-card">
+                <div class="card-header ">
+                    <div class="easion-card-icon">
+                        <i class="fas fa-table"></i>
+                    </div>
+                    <div class="easion-card-title"> 买卖列表 </div>
+                    <div class="easion-card-menu">
+                        <div class="easion-card-title"> 新增 </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                        <table class="table table-striped table-in-card">
+                            <thead>
+                                <tr>
+                                    <th scope="col">序号</th>
+                                    <th scope="col">购买/出售</th>
+                                    <th scope="col">船舶mmsi</th>
+                                    <th scope="col">单价(元/吨)</th>
+                                    <th scope="col">数量</th>
+                                    <th scope="col">  </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">1</th>
+                                    <td>Mark</td>
+                                    <td>Otto</td>
+                                    <td>@mdo</td>
+                                    <td>@mdo</td>
+                                    <td>@mdo</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">2</th>
+                                    <td>Jacob</td>
+                                    <td>Thornton</td>
+                                    <td>@fat</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">3</th>
+                                    <td>Larry</td>
+                                    <td>the Bird</td>
+                                    <td>@twitter</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+            <div class="card easion-card">
+                <div class="card-header ">
+                    <div class="easion-card-icon">
+                        <i class="fas fa-table"></i>
+                    </div>
+                    <div class="easion-card-title"> 全网最新交易记录(仅呈现非转账交易) </div>
+                </div>
+                <div class="card-body">
+                        <table class="table table-striped table-in-card">
+                            <thead>
+                                <tr>
+                                    <th scope="col">序号</th>
+                                    <th scope="col">买方船舶mmsi</th>
+                                    <th scope="col">卖方船舶mmsi</th>
+                                    <th scope="col">单价(元/吨)</th>
+                                    <th scope="col">数量</th>
+                                    <th scope="col">交易hash</th>
+                                    <th scope="col">交易时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">1</th>
+                                    <td>Mark</td>
+                                    <td>Otto</td>
+                                    <td>@mdo</td>
+                                    <td>@mdo</td>
+                                    <td>@mdo</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">2</th>
+                                    <td>Jacob</td>
+                                    <td>Thornton</td>
+                                    <td>@fat</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">3</th>
+                                    <td>Larry</td>
+                                    <td>the Bird</td>
+                                    <td>@twitter</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+            <div class="card easion-card">
+                <div class="card-header ">
+                    <div class="easion-card-icon">
+                        <i class="fas fa-table"></i>
+                    </div>
+                    <div class="easion-card-title"> 个人交易记录 </div>
+                </div>
+                <div class="card-body">
+                        <table class="table table-striped table-in-card">
+                            <thead>
+                                <tr>
+                                    <th scope="col">序号</th>
+                                    <th scope="col">买方船舶mmsi</th>
+                                    <th scope="col">卖方船舶mmsi</th>
+                                    <th scope="col">单价(元/吨)<br>(直接转账默认单价为0)</th>
+                                    <th scope="col">数量</th>
+                                    <th scope="col">交易hash</th>
+                                    <th scope="col">交易时间</th>
+                                    <th scope="col">余额</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for transaction in transaction_myself %}
+                                <tr>
+                                    <th scope="row">{{ transaction[0] }}</th>
+                                    {% for rest in transaction[1:5] %}
+                                    <td>{{ rest }}</td>
+                                    {% endfor %}
+                                    <td onclick="window.open('https://dev-env.wutongchain.com:49082/#/txts/txtsdetail?txhash={{ transaction[5] }}&chainkey=explorer_1&appliName=blkc2022&appliId=blkc2022');">{{ transaction[5] }}</td>
+                                    <td> {{ transaction[6] }} </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+            </div>
+        </div>
+	</div>
+</main>
+{% endblock dash_app %}
+
+{% block myjavascript %}
+
+{% endblock myjavascript %}
