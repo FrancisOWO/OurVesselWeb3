@@ -22,10 +22,12 @@
                     </div>
                     <div class="easion-card-title"> 买卖列表 </div>
                     <div class="easion-card-menu">
-                        <div class="easion-card-title"> 新增 </div>
+                        <a style="font-size: 16px" href="#creat_transaction"> 创建交易 </a>
                     </div>
                 </div>
                 <div class="card-body">
+                <form method="post">
+                    {{ carbon_transaction_operate_form.csrf_token }}
                         <table class="table table-striped table-in-card">
                             <thead>
                                 <tr>
@@ -34,33 +36,59 @@
                                     <th scope="col">船舶mmsi</th>
                                     <th scope="col">单价(元/吨)</th>
                                     <th scope="col">数量</th>
-                                    <th scope="col">  </th>
+                                    <th scope="col">交易hash</th>
+                                    <th scope="col">操作</th>
                                 </tr>
                             </thead>
                             <tbody>
+                            {% for transaction in transaction_list %}
                                 <tr>
-                                    <th scope="row">1</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>@mdo</td>
-                                    <td>@mdo</td>
+                                    <th scope="row">{{ transaction[0] }}</th>
+                                    {% if transaction[1] == 0 %}
+                                    <td>出售</td>
+                                    {% else %}
+                                    <td>购买</td>
+                                    {% endif %}
+                                    {% for rest in transaction[2:5] %}
+                                    <td>{{ rest }}</td>
+                                    {% endfor %}
+                                    <td onclick="window.open('https://dev-env.wutongchain.com:49082/#/txts/txtsdetail?txhash={{ transaction[5] }}&chainkey=explorer_1&appliName=blkc2022&appliId=blkc2022');">{{ transaction[5] }}</td>
+                                    {% if transaction[6] == 1 %}
+                                        <td>
+{#                                            <input class="btn-primary" onclick="transaction_cancel({{ transaction[5] }})">#}
+                                        <input class="btn btn-primary" id="btn_cancel" name="btn_cancel" type="submit" value="撤销" onclick="transaction_cancel('{{ transaction[5] }}')">
+                                        </td>
+{#                                    <td> {{carbon_transaction_operate_form.btn_cancel}} </td>#}
+                                    {% else %}
+                                        {% if transaction[1] == 0 %}
+                                            <td>
+                                            <input class="btn btn-primary" id="btn_buy" name="btn_buy" type="submit" value="购买" onclick="transaction_buy('{{ transaction[5] }}')">
+                                            </td>
+                                        {% else %}
+                                            <td>
+                                            <input class="btn btn-primary" id="btn_sell" name="btn_sell" type="submit" value="出售" onclick="transaction_cancel('{{ transaction[5] }}')">
+                                            </td>
+                                        {% endif %}
+                                    {% endif %}
                                 </tr>
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">3</th>
-                                    <td>Larry</td>
-                                    <td>the Bird</td>
-                                    <td>@twitter</td>
-                                </tr>
+                            {% endfor %}
+
                             </tbody>
                         </table>
+                    <div class="operate_cancel" id="operate_cancel" style="display: none">
+                            {{ carbon_transaction_operate_form.hash_cancel.label }}
+                            {{carbon_transaction_operate_form.hash_cancel}}
                     </div>
+                    <div class="operate_buy" id="operate_buy" style="display: none">
+                        {{ carbon_transaction_operate_form.hash_buy.label }}
+                        {{carbon_transaction_operate_form.hash_buy}}
+                    </div>
+                    <div class="operate_sell" id="operate_sell" style="display: none">
+                        {{ carbon_transaction_operate_form.hash_sell.label }}
+                        {{carbon_transaction_operate_form.hash_sell}}
+                    </div>
+                </form>
+                </div>
             </div>
             </div>
         </div>
@@ -72,6 +100,9 @@
                         <i class="fas fa-table"></i>
                     </div>
                     <div class="easion-card-title"> 全网最新交易记录(仅呈现非转账交易) </div>
+                    <div class="easion-card-menu">
+                        <a style="font-size: 16px" href="#creat_transaction"> 创建交易 </a>
+                    </div>
                 </div>
                 <div class="card-body">
                         <table class="table table-striped table-in-card">
@@ -87,26 +118,14 @@
                                 </tr>
                             </thead>
                             <tbody>
+                            {% for transaction in transaction_all %}
                                 <tr>
-                                    <th scope="row">1</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>@mdo</td>
-                                    <td>@mdo</td>
+                                    <th scope="row">{{ transaction[0] }}</th>
+                                    {% for rest in transaction[1:] %}
+                                    <td>{{ rest }}</td>
+                                    {% endfor %}
                                 </tr>
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">3</th>
-                                    <td>Larry</td>
-                                    <td>the Bird</td>
-                                    <td>@twitter</td>
-                                </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -121,6 +140,9 @@
                         <i class="fas fa-table"></i>
                     </div>
                     <div class="easion-card-title"> 个人交易记录 </div>
+                    <div class="easion-card-menu">
+                        <a style="font-size: 16px" href="#creat_transaction"> 创建交易 </a>
+                    </div>
                 </div>
                 <div class="card-body">
                         <table class="table table-striped table-in-card">
@@ -133,7 +155,6 @@
                                     <th scope="col">数量</th>
                                     <th scope="col">交易hash</th>
                                     <th scope="col">交易时间</th>
-                                    <th scope="col">余额</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -153,10 +174,222 @@
             </div>
             </div>
         </div>
+        <div class="row" id="creat_transaction">
+            <div class="col-12">
+            <div class="card easion-card">
+                <div class="card-header ">
+                    <div class="easion-card-icon">
+                        <i class="fas fa-table"></i>
+                    </div>
+                    <div class="easion-card-title"> 创建交易&emsp;(本船：{{ main_ship }}&emsp;&emsp;mmsi：{{ main_ship_mmsi }}&emsp;碳排放余额：{{ balance }}&emsp;冻结额度：{{ frozen_balance }}) </div>
+                    <div class="easion-card-menu">
+                        <div class="dropdown show">
+                            <a class="easion-card-menu-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+                                {% for name in shipnames %}
+                                <a class="dropdown-item" href="#">{{ name }}</a>
+                                {% endfor %}
+{#                                    <a class="dropdown-item" href="#">Something else here</a>#}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form method="post">
+                        {{ carbon_transaction_form.csrf_token }}
+                        <div class="row">
+                            <div class="col-3">
+                            {{ carbon_transaction_form.transaction_type.label }}
+                            </div>
+                            <div class="col-3">
+                            <input id="transaction_type-0" name="transaction_type" required="" type="radio" value="1" onclick="carbon_sell()">
+                            <label for="transaction_type-0">出售</label>
+                            </div>
+                            <div class="col-3">
+                            <input id="transaction_type-1" name="transaction_type" required="" type="radio" value="2" onclick="carbon_buy()">
+                            <label for="transaction_type-1">买入</label>
+                            </div>
+                            <div class="col-3">
+                            <input id="transaction_type-2" name="transaction_type" required="" type="radio" value="3" onclick="carbon_transfer()">
+                            <label for="transaction_type-2">转账</label>
+                            </div>
+                         </div>
+                        <div class="transaction_sell" id="transaction_sell" style="display: none">
+                            <div class="row" >
+                            <div class="col-1" style="display: flex; align-items: center">
+                                {{ carbon_transaction_form.transaction_price1.label }}
+                            </div>
+                            <div class="col-2">
+                                 {{carbon_transaction_form.transaction_price1}}
+                            </div>
+                            <div class="col-1">
+
+                            </div>
+                            <div class="col-1" style="display: flex; align-items: center">
+                                {{ carbon_transaction_form.transaction_number1.label }}
+                            </div>
+                            <div class="col-2">
+                                 {{carbon_transaction_form.transaction_number1}}
+                            </div>
+                            <div class="col-1">
+
+                            </div>
+                            <div class="col-1" style="display: flex; align-items: center">
+                                {{ carbon_transaction_form.transaction_time1.label }}
+                            </div>
+                            <div class="col-2">
+                                 {{carbon_transaction_form.transaction_time1}}
+                            </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="account-dialog-actions" style="float: right">
+                                    <div>{{carbon_transaction_form.submit}}</div>
+                                    <div class="btn btn-default" onclick="clearradio()" >取消</div>
+                               </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="transaction_buy" id="transaction_buy" style="display: none">
+                            <div class="row" >
+                            <div class="col-1" style="display: flex; align-items: center">
+                                {{ carbon_transaction_form.transaction_price2.label }}
+                            </div>
+                            <div class="col-2">
+                                 {{carbon_transaction_form.transaction_price2}}
+                            </div>
+                            <div class="col-1">
+
+                            </div>
+                            <div class="col-1" style="display: flex; align-items: center">
+                                {{ carbon_transaction_form.transaction_number2.label }}
+                            </div>
+                            <div class="col-2">
+                                 {{carbon_transaction_form.transaction_number2}}
+                            </div>
+                            <div class="col-1">
+
+                            </div>
+                            <div class="col-1" style="display: flex; align-items: center">
+                                {{ carbon_transaction_form.transaction_time2.label }}
+                            </div>
+                            <div class="col-2">
+                                 {{carbon_transaction_form.transaction_time2}}
+                            </div>
+                            </div>
+                             <div class="row">
+                                <div class="col-12">
+                                    <div class="account-dialog-actions" style="float: right">
+                                    <div>{{carbon_transaction_form.submit}}</div>
+                                    <div class="btn btn-default" onclick="clearradio()" >取消</div>
+                               </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="transaction_transfer" id="transaction_transfer" style="display: none">
+                            <div class="row" >
+                            <div class="col-1" style="display: flex; align-items: center">
+                                {{ carbon_transaction_form.transaction_buyer.label }}
+                            </div>
+                            <div class="col-3">
+                                 {{carbon_transaction_form.transaction_buyer}}
+                            </div>
+                            <div class="col-2">
+
+                            </div>
+                            <div class="col-1" style="display: flex; align-items: center">
+                                {{ carbon_transaction_form.transaction_number3.label }}
+                            </div>
+                            <div class="col-3">
+                                 {{carbon_transaction_form.transaction_number3}}
+                            </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="account-dialog-actions" style="float: right">
+                                    <div>{{carbon_transaction_form.submit}}</div>
+                                    <div class="btn btn-default" onclick="clearradio()" >取消</div>
+                               </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            </div>
+        </div>
 	</div>
 </main>
 {% endblock dash_app %}
 
 {% block myjavascript %}
+<script>
+    function carbon_sell() {
+        $(".transaction_sell").show();
+        $(".transaction_buy").hide();
+        $(".transaction_transfer").hide();
+        {#document.getElementById("tyyyTr").style.display = "";#}
+        {#document.getElementById("wsyyjdr").style.display = "";#}
+    }
 
+    function carbon_buy() {
+        $(".transaction_sell").hide();
+        $(".transaction_buy").show();
+        $(".transaction_transfer").hide();
+    }
+
+    function carbon_transfer() {
+        $(".transaction_sell").hide();
+        $(".transaction_buy").hide();
+        $(".transaction_transfer").show();
+    }
+
+    $(function(){
+        var list = $('#transaction_type:checked').val();
+        if( list === 1){
+            $(".transaction_sell").show();
+        }
+        if( list === 2){
+            $(".transaction_buy").show();
+           }
+        if( list === 3){
+            $(".transaction_transfer").show();
+           }
+    });
+
+
+    function clearradio(){                           //取消radio的选择
+        var x=document.getElementsByName("transaction_type");  //获取所有name=brand的元素
+        for(var i=0;i<x.length;i++){ //对所有结果进行遍历，如果状态是被选中的，则将其选择取消
+            if (x[i].checked===true)
+            {
+                x[i].checked=false;
+            }
+        }
+        $(".transaction_sell").hide();
+        $(".transaction_buy").hide();
+        $(".transaction_transfer").hide();
+    }
+
+    function transaction_cancel(value){
+        var input = document.getElementById("hash_cancel");
+        console.log((value))
+        input.value = value;
+    }
+
+    function transaction_buy(value){
+        var input = document.getElementById("hash_buy");
+        console.log((value))
+        input.value = value;
+    }
+
+    function transaction_sell(value){
+        var input = document.getElementById("hash_sell");
+        console.log((value))
+        input.value = value;
+    }
+
+</script>
 {% endblock myjavascript %}

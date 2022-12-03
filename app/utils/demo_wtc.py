@@ -1,5 +1,5 @@
-from app.app_carbon.models import CarbonTransactionInfoMyself
-from app import db
+import wutongchain as wtc
+
 
 Ship = {
 	"中海才华": 477464900,
@@ -21,8 +21,8 @@ if __name__ == "__main__":
 	# res = wtc.sc_install("carbonTransaction.wvm")
 	# print(res)
 	# 合约初始化
-	# res = wtc.sc_invoke(SC['name'], SC["init"], [])
-	# print(res)
+	res = wtc.sc_invoke(SC['name'], SC["init"], [])
+	print(res)
 	# 合约增添
 	# res = wtc.sc_invoke(SC["name"], SC["changeBlance"], [str(Ship["中海才华"]), float(-18753.5)])
 	# print(res)
@@ -35,6 +35,6 @@ if __name__ == "__main__":
 	# 冻结
 	# res = wtc.sc_invoke(SC['name'], SC['frozenBlance'], [str(Ship["中海才华"]), float(1000)])
 	# print(res)
-	transaction = CarbonTransactionInfoMyself("中远海运", "477464900", 0, -18753.5, "b4d2f795681c906c696b880a20ac8ca210ef083d6293ac228ace8a0608bf347c")
-	db.session.add(transaction)
-	db.session.commit()
+	# transaction = CarbonTransactionInfoMyself("中远海运", "477464900", 0, -18753.5, "b4d2f795681c906c696b880a20ac8ca210ef083d6293ac228ace8a0608bf347c")
+	# db.session.add(transaction)
+	# db.session.commit()

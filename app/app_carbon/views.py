@@ -1,9 +1,9 @@
-from flask import render_template  # , flash, redirect, url_for
+from flask import render_template, redirect, url_for  # , flash, redirect, url_for
 from app import app, login
 from app.app_carbon import carbon_bp
 from .models import *
 from .forms import *
-
+from app.utils import wutongchain as wtc
 from app.app_demo import demolinks  # 导航栏链接
 import app.utils.myvessel as mvsl
 import json
@@ -15,7 +15,12 @@ Ship = {
 
 SC = {
     'name': '73a295a5b15dd9c7ed19b0fa60fe96f10d7ba191450ec62d1012a9313c1146c8',
-    'txId': 'a1f733e68fc7a9e0f7f99461c9524739afde1508458af27723b2db5ce52343db'
+    'txId': 'f179d661274612e8b0e73aa2bca6ada9652331cd5d036167d4a6671d9e65b2f3',
+    "init": "init_account",  # 初始化
+    "transfer": "transfer",  # 转账 参数(string from, string to, float amount)
+    "getBlance": "getBlance",  # 余额查询 (string account) account为mmsi，如果查询冻结余额，则为mmsi_frozen
+    "changeBlance": "changeBlance",  # 增减余额 (string account, float amount)
+    "frozenBlance": "frozenBlance",  # 冻结操作 (string account, float amount)
 }
 
 
@@ -143,33 +148,149 @@ def carbon_BaseInfo():
 @carbon_bp.route('/carbon_Transaction', methods=['GET', 'POST'])
 def carbon_Transaction():
     main_ship = "中海才华"
+    main_ship_mmsi = Ship[main_ship]
 
-    results = CarbonTransactionInfoMyself.query.all()    # 获取个人交易全部记录
+    # addCarbonTransaction(1, "477598400", 40, 1000)
+
+    results = CarbonTransaction.query.order_by(CarbonTransaction.TransactionId.desc()).all()  # 获取买卖交易列表
+    transaction_list = []
+    row_id = 1
+    # 读 CarbonTransaction 表的记录
+    for res in results:
+        operate = 0
+        if res.ShipMmsi == str(Ship["中海才华"]):
+            operate = 1  # 表示本人
+        transaction_list.append(
+            [row_id, res.BuyOrSell, res.ShipMmsi, res.Price, res.Number, res.txid, operate])
+        row_id += 1
+
+    results = CarbonTransactionInfoALL.query.order_by(
+        CarbonTransactionInfoALL.TransactionId.desc()).all()  # 获取个人交易全部记录
+    transaction_all = []
+    row_id = 1
+    # 读 CarbonTransactionInfoMyself 表的记录
+    for res in results:
+        transaction_all.append(
+            [row_id, res.BuyerMmsi, res.SellerMmsi, res.Price, res.Number, res.txid, str(res.time)[:-7]])
+        row_id += 1
+
+    results = CarbonTransactionInfoMyself.query.order_by(
+        CarbonTransactionInfoMyself.TransactionId.desc()).all()  # 获取个人交易全部记录
     transaction_myself = []
     row_id = 1
     # 读 CarbonTransactionInfoMyself 表的记录
     for res in results:
-        if res.BuyerMmsi == str(Ship["中海才华"]):
-            res.BuyerMmsi = "我"
-        if res.SellerMmsi == str(Ship["中海才华"]):
-            res.SellerMmsi = "我"
-        transaction_myself.append([row_id, res.BuyerMmsi, res.SellerMmsi, res.Price, res.Number, res.txid, str(res.time)[:-7]])
+        transaction_myself.append(
+            [row_id, res.BuyerMmsi, res.SellerMmsi, res.Price, res.Number, res.txid, str(res.time)[:-7]])
         row_id += 1
-    print(transaction_myself)
+
+    #  获取碳排放余额和冻结额度
+    balance = get_balance(str(Ship[main_ship]))
+    frozen_balance = get_balance(str(Ship[main_ship]) + "_frozen")
+
+    carbon_transaction_form = CarbonTransactionForm()
+    if carbon_transaction_form.submit.data:
+        if carbon_transaction_form.transaction_type.data == "1":
+            buy, mmsi, price, number = 0, str(Ship["中海才华"]), float(
+                carbon_transaction_form.transaction_price1.data), int(
+                carbon_transaction_form.transaction_number1.data)
+            addCarbonTransaction(buy, mmsi, price, number)
+        elif carbon_transaction_form.transaction_type.data == "2":
+            buy, mmsi, price, number = 1, str(Ship["中海才华"]), float(
+                carbon_transaction_form.transaction_price2.data), int(
+                carbon_transaction_form.transaction_number2.data)
+            addCarbonTransaction(buy, mmsi, price, number)
+        elif carbon_transaction_form.transaction_type.data == "3":
+            buyer = str(carbon_transaction_form.transaction_buyer.data)
+            print(carbon_transaction_form.transaction_buyer.data)
+            seller = str(Ship[main_ship])
+            price = float(0)
+            number = float(carbon_transaction_form.transaction_number3.data)
+            addCarbonTransactionInfoMyself(buyer, seller, price, number)
+        return redirect(url_for('carbon.carbon_Transaction'))
+
+    carbon_transaction_operate_form = CarbonTransactionOperateForm()
+    if carbon_transaction_operate_form.btn_cancel.data:
+        person_p = CarbonTransaction.query.filter_by(txid=str(carbon_transaction_operate_form.hash_cancel.data)).first()
+        print(person_p.Number)
+        return redirect(url_for('carbon.carbon_Transaction'))
+    if carbon_transaction_operate_form.btn_buy.data:
+        person_p = CarbonTransaction.query.filter_by(txid=str(carbon_transaction_operate_form.hash_buy.data)).first()
+        buyer, seller, price, number, statue = str(Ship["中海才华"]), str(person_p.ShipMmsi), float(person_p.Price), float(person_p.Number), True
+        addCarbonTransactionInfoAll(buyer, seller, price, number, statue)
+        db.session.delete(person_p)
+        db.session.commit()
+        print("购买")
+        return redirect(url_for('carbon.carbon_Transaction'))
+    if carbon_transaction_operate_form.btn_sell.data:
+        person_p = CarbonTransaction.query.filter_by(txid=str(carbon_transaction_operate_form.hash_sell.data)).first()
+        buyer, seller, price, number, statue = str(Ship["中海才华"]), str(person_p.ShipMmsi), float(person_p.Price), float(
+            person_p.Number), True
+        addCarbonTransactionInfoAll(buyer, seller, price, number, statue)
+        db.session.delete(person_p)
+        db.session.commit()
+        print("购买")
+        return redirect(url_for('carbon.carbon_Transaction'))
     return render_template(
         "carbon_Transaction.html",
         title='碳交易列表',
         demolinks=demolinks,
         tabletitle="碳排放",
         main_ship=main_ship,
+        main_ship_mmsi=main_ship_mmsi,
+        balance=balance,
+        frozen_balance=frozen_balance,
         shipnames=Ship.keys(),
-        transaction_myself=transaction_myself
+        transaction_list=transaction_list,
+        transaction_myself=transaction_myself,
+        carbon_transaction_form=carbon_transaction_form,
+        carbon_transaction_operate_form=carbon_transaction_operate_form,
+        transaction_all = transaction_all
         # text_list=text_list,
     )
 
 
-def add_date():
-    transaction = CarbonTransactionInfoMyself("中远海运", "477464900", 0, -18753.5,
-                                              "b4d2f795681c906c696b880a20ac8ca210ef083d6293ac228ace8a0608bf347c")
-    db.session.add(transaction)
-    db.session.commit()
+#  交易
+def addCarbonTransactionInfoMyself(buyer, seller, price, number):
+    res = wtc.sc_invoke(SC['name'], SC['transfer'], [str(seller), str(buyer), float(number)])
+    if res:
+        tx_id = res["txId"]
+        transaction = CarbonTransactionInfoMyself(buyer, seller, price, number, tx_id)
+        db.session.add(transaction)
+        db.session.commit()
+
+
+# 冻结碳交易
+def addCarbonTransaction(buy, mmsi, price, number):
+    res = wtc.sc_invoke(SC['name'], SC['frozenBlance'], [str(mmsi), float(number)])
+    if res:
+        tx_id = res["txId"]
+        transaction = CarbonTransaction(buy, mmsi, price, number, tx_id)
+        db.session.add(transaction)
+        db.session.commit()
+        return True
+    else:
+        return False
+
+
+#  查询余额
+def get_balance(mmsi):
+    res = wtc.sc_query(SC['name'], SC['getBlance'], [mmsi])
+    if res:
+        return format(float(res["result"]), '.2f')
+    else:
+        return False
+
+
+def addCarbonTransactionInfoAll(buyer, seller, price, number, statue):
+    # 买方
+    if statue:
+        res = wtc.sc_invoke(SC['name'], SC['changeBlance'], [str(buyer), float(number)])
+    # 卖方
+    else:
+        res = wtc.sc_invoke(SC['name'], SC['changeBlance'], [str(seller), float(-number)])
+    if res:
+        tx_id = res["txId"]
+        transaction = CarbonTransactionInfoALL(buyer, seller, price, number, tx_id)
+        db.session.add(transaction)
+        db.session.commit()
