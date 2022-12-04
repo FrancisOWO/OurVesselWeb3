@@ -1,23 +1,25 @@
     //碳交易合约
     contract CarbonTransaction {
-        
-        //初始化一个账户
-        public string init_account(){
-            string[] name = {"477464900","477598400"}
-            string A_frozen = name[0] + "_frozen"
-            string B_frozen = name[1] + "_frozen"
-            float balA = 24000
-            float balB = 28000
-            db_set(name[0],balA)
-            db_set(name[1],balB)
-            db_set(A_frozen,0)
-            db_set(B_frozen,0)
-            float k = getBlance(name[0])
-            print(k)
-            return "success"
+
+        //碳排放额度发放
+        public string carbon_quota(string account, float amount){
+            if (db_exist(account)){
+                float blance = db_get<float>(account)
+                blance = blance + amount
+                db_set(account, blance)
+                return "exist"
+            }
+            else{
+                string account_frozen = account + "_frozen"
+                float amount_frozen = 0
+                db_set(account, amount)
+                db_set(account_frozen, amount_frozen)
+                return "new_creat"
+            }
+
         }
-        
-        //转账操作
+
+        //碳排放转账操作
         public string transfer(string from, string to, float amount) {
             float balA = db_get<float>(from)
             float balB = db_get<float>(to)
@@ -31,48 +33,84 @@
             }
             return "success"
         }
-    
-        //查询账户余额
+
+        //查询碳排放余额
         public float getBlance(string account){
             print(account)
             float a = db_get<float>(account)
             return a
         }
-        
-        
-        // 增减
+
+        //查询碳排放冻结余额
+        public float getFrozenBlance(string account){
+            string account_frozen = account + "_frozen"
+            float a = db_get<float>(account_frozen)
+            return a
+        }
+
+        // 碳排放增减
         public string changeBlance(string account, float amount){
+            if (db_exist(account)){
+                float blance = db_get<float>(account)
+                blance = blance + amount
+                if (blance < 0){
+                return "failed"
+                }
+                else{
+                    db_set(account, blance)
+                    return "success"
+                }
+
+            }
+            else{
+                if (amount < 0){
+                    return "failed"
+                }
+                else{
+                    string account_frozen = account + "_frozen"
+                    float amount_frozen = 0
+                    db_set(account, amount)
+                    db_set(account_frozen, amount_frozen)
+                    return "success"
+                }
+            }
             float blance = db_get<float>(account)
             blance = blance + amount
+
+        }
+
+        // 碳排放冻结
+        public string frozenBlance(string account, float amount){
+            string accountfrozen = account + "_frozen"
+            float blance = db_get<float>(account)
+            float blance_frozen = db_get<float>(accountfrozen)
+            blance = blance - amount
             if (blance < 0){
                 return "failed"
             }
             else{
-                db_set(account, blance)
-                return "success"
-            }
-        }
-        
-        // 冻结
-        public string frozenBlance(string account, float amount){
-            if (amount < 0)
-            {
-                return "success"
-            }
-            else{
-                string accountfrozen = account + "_frozen"
-                float blance = db_get<float>(account)
-                float blance_frozen = db_get<float>(accountfrozen)
-                blance = blance - amount
-                if (blance < 0){
+                blance_frozen = blance_frozen + amount
+                if(blance_frozen < 0){
                     return "failed"
                 }
                 else{
                     db_set(account, blance)
-                    blance_frozen = blance_frozen + amount
                     db_set(accountfrozen, blance_frozen)
                     return "success"
-                }  
+                }
+            }
+        }
+
+        public string init_account(string account){
+            if (db_exist(account)){
+                float blance = 0
+                string account_frozen = account + "_frozen"
+                db_set(account, blance)
+                db_set(account_frozen, blance)
+                return "success"
+            }
+            else{
+                return "fail"
             }
         }
     }

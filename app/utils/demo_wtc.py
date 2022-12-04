@@ -4,11 +4,12 @@ import wutongchain as wtc
 Ship = {
 	"中海才华": 477464900,
 	"中海海王星": 477598400,
+	"远洋7007": 413798964,
 }
 
 SC = {
 	'name': '73a295a5b15dd9c7ed19b0fa60fe96f10d7ba191450ec62d1012a9313c1146c8',
-	'txId': 'f179d661274612e8b0e73aa2bca6ada9652331cd5d036167d4a6671d9e65b2f3',
+	'txId': '2c22228b7750ae6aa4ff5e41d824a26eeb0ae2929d09604e1083aad5d209d1db',
 	"init": "init_account",  # 初始化
 	"transfer": "transfer",  # 转账 参数(string from, string to, float amount)
 	"getBlance": "getBlance",  # 余额查询 (string account) account为mmsi，如果查询冻结余额，则为mmsi_frozen
@@ -18,11 +19,11 @@ SC = {
 
 if __name__ == "__main__":
 	# 合约安装
-	# res = wtc.sc_install("carbonTransaction.wvm")
-	# print(res)
-	# 合约初始化
-	res = wtc.sc_invoke(SC['name'], SC["init"], [])
+	res = wtc.sc_install("carbonTransaction.wvm")
 	print(res)
+	# 账户初始化
+	# res = wtc.sc_invoke(SC['name'], SC["init"], [])
+	# print(res)
 	# 合约增添
 	# res = wtc.sc_invoke(SC["name"], SC["changeBlance"], [str(Ship["中海才华"]), float(-18753.5)])
 	# print(res)
