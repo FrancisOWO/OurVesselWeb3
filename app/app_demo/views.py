@@ -51,7 +51,7 @@ def HelloWTC():
         f"应用链: {wtc.get_ledger_name()}",
         f"当前区块高度: {wtc.get_block_height()}",
         f"洋山港: {mvsl.get_port_by_code(port_list['洋山港'])}",
-        f"烟台港: {mvsl.get_port_by_code(port_list['烟台港'])}",
+        # f"天气: {mvsl.get_forecast([port_list['洋山港']])}",
         ]
 
     return render_template(

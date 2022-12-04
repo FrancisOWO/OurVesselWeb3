@@ -421,7 +421,8 @@ def get_access_token():
     return token
 
 
-# token 1个小时过期，过期后需再次请求
+# token 过期后需重新请求
+global TEMP_TOKEN
 TEMP_TOKEN = get_access_token()
 
 
@@ -438,6 +439,7 @@ def get_holiday_list(ctryCodes, year, month):
     url = f"{SVC_URL_PREFIX}/sdc/v1/ports/holiday/list"
 
     # 请求头
+    global TEMP_TOKEN
     headers = {
         'Content-Type': 'application/json',
         "Authorization": TEMP_TOKEN
@@ -457,7 +459,15 @@ def get_holiday_list(ctryCodes, year, month):
     res = requests.post(url=url, data=json.dumps(data), headers=headers)
     if res.status_code != 200:
         print(res)
-        return None
+        if res.status_code == 401:
+            # token 过期，重新请求
+            TEMP_TOKEN = get_access_token()
+            headers["Authorization"] = TEMP_TOKEN
+            res = requests.post(url=url, data=json.dumps(data), headers=headers)
+            print(res)
+        # 第二次请求失败，不再重新请求
+        if res.status_code != 200:
+            return None
 
     if res.json()["success"] == False:
         return None
@@ -482,3 +492,99 @@ def get_holiday_list(ctryCodes, year, month):
     
     # print(holiday_list)
     return holiday_list
+
+
+'''
+API     : /sdc/v1/ports/weather/batch/forecast
+请求方式    : POST
+说明  : 获取港口天气
+返回
+'''
+
+
+def get_forecast(portCodes):
+    # url
+    url = f"{SVC_URL_PREFIX}/sdc/v1/ports/weather/batch/forecast"
+
+    # 请求头
+    global TEMP_TOKEN
+    headers = {
+        'Content-Type': 'application/json',
+        "Authorization": TEMP_TOKEN
+    }
+    # 数据
+    data = {
+      "portCodes": portCodes,
+    }
+    # 发送请求
+    res = requests.post(url=url, data=json.dumps(data), headers=headers)
+    if res.status_code != 200:
+        print(res)
+        if res.status_code == 401:
+            # token 过期，重新请求
+            TEMP_TOKEN = get_access_token()
+            headers["Authorization"] = TEMP_TOKEN
+            res = requests.post(url=url, data=json.dumps(data), headers=headers)
+            print(res)
+        # 第二次请求失败，不再重新请求
+        if res.status_code != 200:
+            return None
+
+    if res.json()["success"] == False:
+        print("success: False")
+        return None
+
+    res_dict = res.json()["data"][0]
+
+    current_dict = res_dict["current"]
+    current_weather = current_dict["weathers"][0]
+    ret_current_dict = {
+        "description": current_weather["description"], # "阴，多云",
+        "iconData":  current_weather["iconData"],
+        "windSpeed": current_dict["windSpeed"], # 10.33,
+        "windSpeedLevel": current_dict["windSpeedLevel"], # "5",
+        "windDeg": current_dict["windDeg"],     #  15,
+        "windDegCn": current_dict["windDegCn"], # "东北偏北",
+        "pressure": current_dict["pressure"], # 1024,
+        "humidity": current_dict["humidity"], # 89,
+        "feelLike": round(current_dict["fellLike"]["feelLike"]), #  14.15,
+        "temp": round(current_dict["temperature"]["temp"]), # 14.34,
+    }
+    print(ret_current_dict["description"])
+
+    # 每个属性存一个列表，便于画图
+    dayWeekDescCn_list = []
+    description_list = []
+    iconData_list = []
+    tempMax_list = []
+    tempMin_list = []
+
+    for forecast_dict in res_dict["forecastDetail"]:
+        forecast_weather = forecast_dict["weathers"][0]
+        # ret_forecast_dict = {
+        #     "dayWeekDescCn": forecast_dict["dayWeekDescCn"], # "星期日",
+        #     "description": forecast_weather["description"], # "中雨",
+        #     "iconData":  forecast_weather["iconData"],
+        #     "tempMax": forecast_dict["temperature"]["max"], # 14.34,
+        #     "tempMin": forecast_dict["temperature"]["min"], # 11.8,
+        # }
+        dayWeekDescCn_list.append(forecast_dict["dayWeekDescCn"])
+        description_list.append(forecast_weather["description"])
+        iconData_list.append(forecast_weather["iconData"])
+        tempMax_list.append(round(forecast_dict["temperature"]["max"]))
+        tempMin_list.append(round(forecast_dict["temperature"]["min"]))
+    
+    ret_dict = {
+        "current": ret_current_dict,
+        "forecastDetail": {
+            "dayWeekDescCn": dayWeekDescCn_list,
+            "description": description_list,
+            "iconData":  iconData_list,
+            "tempMax": tempMax_list,
+            "tempMin": tempMin_list,
+        }
+    }
+
+    print(ret_dict["forecastDetail"]["dayWeekDescCn"])
+    print(ret_dict["forecastDetail"]["description"])
+    return ret_dict

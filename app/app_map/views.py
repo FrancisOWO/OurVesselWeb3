@@ -96,3 +96,15 @@ def get_holidays():
     #     "holidays": holidays
     # }
     return jsonify(holidays)
+
+
+@map_bp.route('/forecast', methods=['GET'])
+def get_forecast():
+    portCode = request.args.get("portCode")
+    print(portCode)
+
+    # 根据港口代码请求港口信息
+    forecast = mvsl.get_forecast([portCode])
+    print(forecast["current"]["windDegCn"])
+
+    return jsonify(forecast)

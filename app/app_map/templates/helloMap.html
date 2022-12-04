@@ -107,7 +107,7 @@
 	                    <div class="easion-card-menu" id="closeDate" role="button"> &times; </div>
 	                </div>
 	                <div class="card-body">
-	                	<p id="activeDate"> 2022年12月4日 </p>
+	                	<p id="activeDate"> 2022年12月5日 </p>
 	                	<div id="holidays">
 							<p>无假期信息</p>
 						</div>
@@ -123,11 +123,50 @@
 	                    <div class="easion-card-title"> 港口天气 </div>
 	                    <div class="easion-card-menu" id="closeForecast" role="button"> &times; </div>
 	                </div>
-	                <div class="card-body" style="width: 500px;">
-	                	<div id="forecast" class="">
-	                		这里是天气这里是天气这里是天气这里是天气
-							<!-- 这里是天气 -->
+	                <div class="card-body" style="width:950px; margin-left:20px">
+	                	<div style="display:inline-block; text-align:center; float:left; margin-top:20px">
+							<h3 id="wPortName" style="margin-top:10px">港口名</h3>
+							<img id="iconData" style="height:120px;"/>
+							<div id="description" style="height:35px; font-size:large;">天气描述</div>
+							<div id="temperature" style="height:35px; font-size:large;">温度</div>
+							<table style="font-size:medium; margin-top:20px">
+								<thead>
+									<tr>
+										<td style="width:100px"></td>
+										<td></td>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>体感温度</td>
+										<td id="feelLike">None</td>
+									</tr>
+									<tr>
+										<td>风速</td>
+										<td id="windSpeed">None</td>
+									</tr>
+									<tr>
+										<td>风向</td>
+										<td id="windDeg">None</td>
+									</tr>
+									<tr>
+										<td>湿度</td>
+										<td id="humidity">None</td>
+									</tr>
+									<tr>
+										<td>气压</td>
+										<td id="pressure">None</td>
+									</tr>											
+								</tbody>
+							</table>
 						</div>
+						<div style="display: inline-block; float:right; margin-top:20px">
+							<div id="forecastDetail" style="font-size: small; margin-left: 50px;">
+							</div>
+							<div class="card-body easion-card-body-chart" style="width:600px; margin-top:30px;">
+	                            <canvas id="easionChartjsLine"></canvas>
+	                        </div>
+                        </div>
 	                </div>
 	            </div>
 	       	</div>
@@ -378,6 +417,132 @@
 		resizeCalendar();
 		changeCalendarBody();
 
+		// 填充天气预报面板
+		function fillForecast() {
+			let url_get_forecast =  "{{ url_for('map.get_forecast') }}";
+			let portCode = $("#portCode").text(); //"CNYSN";
+			$.ajax({
+				type: "GET",
+				url: url_get_forecast,
+				data: {
+					"portCode": portCode
+				},
+				success: function(data){
+
+					// 今日天气
+					let today = data.current;
+
+					// <div id="wPortName">港口名</div>
+					// <div id="description">天气描述</div>
+					// <img id="iconData" width="100px">
+					// <div id="temperature">温度</div>
+					// <div id="windSpeed">风速</div>
+					// <div id="windDeg">风向</div>
+					// <div id="feelLike">体感温度</div>
+					$("#wPortName").text($("#nameCn").text());
+					$("#description").text(today.description);
+					$("#iconData").attr("src", today.iconData);
+					$("#temperature").text(today.temp + " ℃");
+
+					let windSpeed = today.windSpeed + " m/s (" + today.windSpeedLevel + "级)";
+					let windDeg = today.windDeg + "° (" + today.windDegCn + ")";
+					$("#windSpeed").text(windSpeed);
+					$("#windDeg").text(today.description);
+					$("#feelLike").text(today.feelLike + " ℃");
+					$("#humidity").text(today.humidity + " %");
+					$("#pressure").text(today.pressure + " hPa");
+
+					// 天气预报
+					let fdetail = data.forecastDetail;
+
+					let dayWeekDescCn = fdetail.dayWeekDescCn;
+					dayWeekDescCn[0] = "今天";
+
+					let tempMax = fdetail.tempMax;
+					let tempMin = fdetail.tempMin;
+
+					// 显示下面一周的天气 【星期，图标，天气】
+					let fcontent = "";
+					for(let i = 0; i < fdetail.description.length; i++){
+						fcontent = fcontent
+							+ '<div style="text-align:center; display:inline-block; width:65px;">'
+								+ '<div>' + fdetail.dayWeekDescCn[i] + '</div>'		// 星期几
+								+ '<img height="55px" src="' + fdetail.iconData[i] + '"</div>'	// 天气图标
+								+ '<div>' + fdetail.description[i] + '</div>'		// 天气描述
+							+ '</div>';
+					}
+					$("#forecastDetail").html(fcontent);
+
+					// 画气温折线图
+                    var ctx = document.getElementById("easionChartjsLine").getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+			                labels: dayWeekDescCn, // ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+			                datasets: [
+			                {
+			                    label: '最高气温',
+			                    data: tempMax, // [4, 12, 11, 2, 14],
+			                    backgroundColor: window.chartColors.danger,
+			                    borderColor: window.chartColors.danger,
+			                    fill: false,
+			                    lineTension: 0
+			                },
+			                {
+			                    label: '最低气温',
+			                    data: tempMin, // [12, 19, 3, 5, 2],
+			                    backgroundColor: window.chartColors.primary,
+			                    borderColor: window.chartColors.primary,
+			                    fill: false,
+			                    lineTension: 0
+			                }]
+                        },
+			            options: {
+			                legend: {
+			                    display: true
+			                },
+						    scales: {
+						        xAxes: [{
+						            gridLines: {
+						                display: false
+						            }
+						        }],
+						        yAxes: [{
+						        	display: false
+						        }]
+						    },
+			                // 默认显示数据值
+			                animation: {
+				                onComplete: function() {
+				                	let chartInst = this.chart;
+				                	let ctx = chartInst.ctx;
+									ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+			                        ctx.textAlign = 'center';
+			                        ctx.textBaseline = 'bottom';
+
+				                	this.data.datasets.forEach(function(dataset, i){
+				                		if(i == 0)
+				                			ctx.fillStyle = window.chartColors.danger;
+				                		else
+				                			ctx.fillStyle = window.chartColors.primary;
+
+				                		let meta = chartInst.controller.getDatasetMeta(i);
+				                		meta.data.forEach(function(bar, index){
+				                			let data = dataset.data[index] + "℃";
+				                			ctx.fillText(data, bar._model.x, bar._model.y-5);
+				                		});
+				                	});
+				                }
+				            }
+			            }
+                    });
+				},
+				error: function(){
+					alert("ERROR: fillForecast");
+				}
+			});
+	    }
+
 		$(".datepicker-days .prev").on("click", function() {
 			changeCalendarBody();
 		});
@@ -393,6 +558,7 @@
 		});
 
 		$("#tabForecast").on("click", function() {
+	    	fillForecast();
 			$("#cardForecast").show();
 		});
 		$("#tabCalendar").on("click", function() {
@@ -405,7 +571,6 @@
 		hoverElementByID("cardCalendar");
 		hoverElementByID("cardForecast");
 		hoverElementByID("cardDate");
-
 
 	});
 </script>
