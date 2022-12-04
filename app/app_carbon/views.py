@@ -15,12 +15,19 @@ Ship = {
 
 SC = {
     'name': '73a295a5b15dd9c7ed19b0fa60fe96f10d7ba191450ec62d1012a9313c1146c8',
-    'txId': 'f179d661274612e8b0e73aa2bca6ada9652331cd5d036167d4a6671d9e65b2f3',
-    "init": "init_account",  # 初始化
+    'txId': 'c6aaf6130e913a9c0e3db159690b69a903b4248c4592cb910dc3867527319b13',
+    "carbon_quota": "carbon_quota",  # 额度发放(string account, float amount)
+    "init": "init_account",  # 初始化账户(string account)
     "transfer": "transfer",  # 转账 参数(string from, string to, float amount)
     "getBlance": "getBlance",  # 余额查询 (string account) account为mmsi，如果查询冻结余额，则为mmsi_frozen
+    "getFrozenBlance": "getFrozenBlance",  # 查询碳排放冻结余额(string account)
     "changeBlance": "changeBlance",  # 增减余额 (string account, float amount)
     "frozenBlance": "frozenBlance",  # 冻结操作 (string account, float amount)
+}
+
+Blockchain_Transaction_Id = {
+    "船舶信息存证": "7dca33368851e1aadfbc67008ab07e3e2203e9c141ef825b209e4e3e6f670290",
+    "船舶航运信息存证": "3f2721b5aac1cfc649021f39530215c6d7aae5c2720189893b10023b8cf26e1d"
 }
 
 
@@ -138,6 +145,7 @@ def carbon_BaseInfo():
         shipnames=Ship.keys(),
         ship_info=ship_info,
         ship_status=ship_status,
+        Blockchain_Transaction_Id=Blockchain_Transaction_Id,
         ship_sail_output_data=ship_sail_output_data,
         ship_cii_output_data=ship_cii_output_data,
         ship_carbon_output_data=ship_carbon_output_data,
@@ -147,6 +155,11 @@ def carbon_BaseInfo():
 
 @carbon_bp.route('/carbon_Transaction', methods=['GET', 'POST'])
 def carbon_Transaction():
+    # carbon_quota(str(Ship["中海才华"]), 24000)
+    # carbon_quota(str(Ship["中海海王星"]), 28000)
+    # carbon_quota("413798964", 12000)
+    # addCarbonTransaction(0, str(Ship["中海海王星"]), 50, 1000)
+    # addCarbonTransaction(1, str("413798964"), 45, 2000)
     main_ship = "中海才华"
     main_ship_mmsi = Ship[main_ship]
 
@@ -212,11 +225,14 @@ def carbon_Transaction():
     carbon_transaction_operate_form = CarbonTransactionOperateForm()
     if carbon_transaction_operate_form.btn_cancel.data:
         person_p = CarbonTransaction.query.filter_by(txid=str(carbon_transaction_operate_form.hash_cancel.data)).first()
-        print(person_p.Number)
+        if remove_carbon_frozen(str(person_p.ShipMmsi), float(person_p.Number)):
+            db.session.delete(person_p)
+            db.session.commit()
         return redirect(url_for('carbon.carbon_Transaction'))
     if carbon_transaction_operate_form.btn_buy.data:
         person_p = CarbonTransaction.query.filter_by(txid=str(carbon_transaction_operate_form.hash_buy.data)).first()
-        buyer, seller, price, number, statue = str(Ship["中海才华"]), str(person_p.ShipMmsi), float(person_p.Price), float(person_p.Number), True
+        buyer, seller, price, number, statue = str(Ship["中海才华"]), str(person_p.ShipMmsi), float(person_p.Price), float(
+            person_p.Number), True
         addCarbonTransactionInfoAll(buyer, seller, price, number, statue)
         db.session.delete(person_p)
         db.session.commit()
@@ -226,7 +242,7 @@ def carbon_Transaction():
         person_p = CarbonTransaction.query.filter_by(txid=str(carbon_transaction_operate_form.hash_sell.data)).first()
         buyer, seller, price, number, statue = str(Ship["中海才华"]), str(person_p.ShipMmsi), float(person_p.Price), float(
             person_p.Number), True
-        addCarbonTransactionInfoAll(buyer, seller, price, number, statue)
+        addCarbonTransactionInfoAll(buyer, seller, price, -number, statue)
         db.session.delete(person_p)
         db.session.commit()
         print("购买")
@@ -245,7 +261,7 @@ def carbon_Transaction():
         transaction_myself=transaction_myself,
         carbon_transaction_form=carbon_transaction_form,
         carbon_transaction_operate_form=carbon_transaction_operate_form,
-        transaction_all = transaction_all
+        transaction_all=transaction_all
         # text_list=text_list,
     )
 
@@ -281,6 +297,13 @@ def get_balance(mmsi):
     else:
         return False
 
+# 解除冻结碳排放
+def remove_carbon_frozen(mmsi, number):
+    res = wtc.sc_invoke(SC['name'], SC['frozenBlance'], [str(mmsi), float(-number + 0.000001)])
+    if res:
+        return True
+    else:
+        return False
 
 def addCarbonTransactionInfoAll(buyer, seller, price, number, statue):
     # 买方
@@ -292,5 +315,16 @@ def addCarbonTransactionInfoAll(buyer, seller, price, number, statue):
     if res:
         tx_id = res["txId"]
         transaction = CarbonTransactionInfoALL(buyer, seller, price, number, tx_id)
+        db.session.add(transaction)
+        db.session.commit()
+
+#  碳排放配额
+def carbon_quota(buyer, number):
+    res = wtc.sc_invoke(SC['name'], SC['changeBlance'], [str(buyer), float(number)])
+    seller = "中远海运集团"
+    price = float(0)
+    if res:
+        tx_id = res["txId"]
+        transaction = CarbonTransactionInfoMyself(buyer, seller, price, number, tx_id)
         db.session.add(transaction)
         db.session.commit()

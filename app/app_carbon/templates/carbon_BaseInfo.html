@@ -47,23 +47,26 @@
                                         <li> 长 * 宽 * 高: {{ ship_info["length_width_height"] }}</li>
                                         <li> 建成日期: {{ ship_info["buildYearMonth"] }} </li>
                                         <li> 设计吃水/航速: {{ ship_info["draught_speed"] }} </li>
+                                        <li type="button" class="stats-timeframe" style="float: right" onclick="window.open('https://dev-env.wutongchain.com:49082/#/txts/txtsdetail?txhash={{ Blockchain_Transaction_Id["船舶信息存证"] }}&chainkey=explorer_1&appliName=blkc2022&appliId=blkc2022');">点击查询</li>
                                     </ul>
                                 </div>
                             </div>
 {#                            航行状态#}
                             <div class="col-lg-3">
                                 <div class="stats stats-light" style="height: 120px">
-                                    <h3 class="stats-title"> 航行状态 </h3>
-                                    <p class="h4" align="center"> {{ship_status["legStartPortNameCn"]}}[{{ ship_status["legStartPortCtryCode"] }}] → {{ship_status["legEndPortNameCn"]}}[{{ ship_status["legEndPortCtryCode"] }}] </p>
+                                    <h6 class="stats-title" style="font-size: 18px"> 航行状态: {{ship_status["legStartPortNameCn"]}}[{{ ship_status["legStartPortCtryCode"] }}] → {{ship_status["legEndPortNameCn"]}}[{{ ship_status["legEndPortCtryCode"] }}] </h6>
+                                    <h6 class="stats-title" style="font-size: 18px"> 装载物品：{{ship_status["startBerthCargoTypeName"]}} </h6>
+                                    <div class="stats-number" align="center" style="color: #1DAB47;font-size: 24px">航行中</div>
                                     <div class="stats-content">
                                         <div class="stats-icon">
                                             <i class="fas fa-anchor"></i>
                                         </div>
                                         <div class="stats-data">
-                                            <div class="stats-number" style="color: #1DAB47">航行中</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
                                                 <span class="stats-timeframe">{{ship_status["startPostime"]}}启航</span>
+                                                <br>
+                                                <span class="stats-timeframe" type="button" style="float: right" onclick="window.open('https://dev-env.wutongchain.com:49082/#/txts/txtsdetail?txhash={{ Blockchain_Transaction_Id["船舶航运信息存证"] }}&chainkey=explorer_1&appliName=blkc2022&appliId=blkc2022');">电子期单查询</span>
                                             </div>
                                         </div>
                                     </div>
@@ -160,7 +163,7 @@
                                             <i class="fas fa-globe"></i>
                                         </div>
                                         <div class="stats-data">
-                                            <div class="stats-number">18753.5吨</div>
+                                            <div class="stats-number">18753吨</div>
                                             <div class="stats-change">
 {#                                                <span class="stats-percentage">+17.5%</span>#}
                                                 <span class="stats-timeframe">{{ ship_status["statusTime"] }}</span>
