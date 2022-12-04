@@ -7,6 +7,10 @@ from app.utils.config import HEADER_AUTHORIZATION
 HOST = "voc.myvessel.cn"
 URL_PREFIX = f"https://{HOST}"
 
+# 中远api
+SVC_HOST = "svc.data.myvessel.cn"
+SVC_URL_PREFIX = f"https://{SVC_HOST}"
+
 
 def get_host():
     return HOST
@@ -14,6 +18,15 @@ def get_host():
 
 def get_url_prefix():
     return URL_PREFIX
+
+
+# 经纬度【小数（十进制）=>度/分/秒（60进制）】
+def cvtDec2B60(dec):
+    r = int(dec)
+    dec = 60*(dec-r)
+    m = int(dec)
+    s = int(60*(dec-m))
+    return f"{r}°{m}′{s}″"
 
 
 '''
@@ -49,6 +62,8 @@ def get_port_by_code(port_code):
         # "namePinyin": res_dict["namePinyin"],	# "YANTAI",
         "lon": res_dict["lon"],  # 121.400000,
         "lat": res_dict["lat"],  # 37.550000,
+        "lonStr": cvtDec2B60(res_dict["lon"]),  # 121°24′00″,
+        "latStr": cvtDec2B60(res_dict["lat"]),  # 37°33′00″,
     }
     return my_dict
 
@@ -372,3 +387,98 @@ def get_shipSailData_by_code(data):
         "avgSpeed": res_dict["avgSpeed"],
     }
     return my_dict
+
+
+
+'''
+API     : /ada/oauth/token
+请求方式    : GET
+说明  : 获取token
+返回
+'''
+
+
+def get_access_token():
+    # url
+    url = f"{SVC_URL_PREFIX}/ada/oauth/token"
+
+    # 参数
+    params = {
+        'grant_type': 'client_credentials',
+        "client_id": "VVV_UNIVERSITY_API01",
+        "client_secret": "8070a482f6ba0c5310984281df52508e"
+    }
+    # 发送请求
+    res = requests.get(url=url, params=params)
+    if res.status_code != 200:
+        print(res)
+        return None
+
+    res_dict = res.json()
+    # print(res_dict)
+
+    token = f"{res_dict['token_type']} {res_dict['access_token']}"
+    return token
+
+
+# token 1个小时过期，过期后需再次请求
+TEMP_TOKEN = get_access_token()
+
+
+'''
+API     : /sdc/v1/ports/holiday/lis
+请求方式    : POST
+说明  : 获取某年某月的假期信息
+返回
+'''
+
+
+def get_holiday_list(ctryCodes, year, month):
+    # url
+    url = f"{SVC_URL_PREFIX}/sdc/v1/ports/holiday/list"
+
+    # 请求头
+    headers = {
+        'Content-Type': 'application/json',
+        "Authorization": TEMP_TOKEN
+    }
+    # 数据
+    data = {
+      "ctryCodes": ctryCodes,
+      "dataSource": "Timeanddate",
+      "holidayType": "",
+      "month": month,
+      "portCodes": [],
+      "year": year,
+      "pageNum": 0,
+      "pageSize": 31
+    }
+    # 发送请求
+    res = requests.post(url=url, data=json.dumps(data), headers=headers)
+    if res.status_code != 200:
+        print(res)
+        return None
+
+    if res.json()["success"] == False:
+        return None
+
+    res_dict = res.json()["data"]
+
+    holiday_list = []
+    for holidays in res_dict:
+        sameTimeHolidays = []
+        for holiday in holidays["sameTimeHolidays"]:
+            holiday_info = {
+                "holidayNameEn": holiday["holidayNameEn"],
+                "holidayType": holiday["holidayType"]
+            }
+            print(holiday_info)
+            sameTimeHolidays.append(holiday_info)
+        holidays_info = {
+            "dateDay": holiday["dateDay"],
+            "holidays": sameTimeHolidays
+        }
+        holiday_list.append(holidays_info)
+    
+    # print(holiday_list)
+    return holiday_list
