@@ -69,7 +69,7 @@ def get_port_by_code(port_code):
         "portCode": res_dict["portCode"],  # "CNYAN",
         "nameCn": res_dict["nameCn"],  # "烟台",
         "nameEn": res_dict["nameEn"],  # "YANTAI",
-        # "ctryCode"	: res_dict["ctryCode"],		# "CN",
+        "ctryCode"	: res_dict["ctryCode"],		# "CN",
         "ctryNameCn": res_dict["ctryNameCn"],  # "中国",
         "ctryNameEn": res_dict["ctryNameEn"],  # "China",
         # "namePinyin": res_dict["namePinyin"],	# "YANTAI",

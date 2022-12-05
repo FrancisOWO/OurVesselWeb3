@@ -342,6 +342,12 @@
 					tempCard.css("z-index", max_index+1);
 					tempCard.show();
 
+					// 隐藏其他资料卡，其中的信息未更新，待再次点开时更新
+					$("#cardForecast").hide();
+					$("#cardCalendar").hide();
+					$("#cardDate").hide();
+
+
 					// 地图标记
 					mapCenterAndZoom(map, data.lon, data.lat, 11)
 					markCurrentPoint(map, data.lon, data.lat, m_cur_id, data.nameCn);
@@ -543,38 +549,38 @@
 				$("#txtSearch").attr("placeholder", "输入船舶");
 			}
 		});
-
+		const tr_height = "50px";
 		function resizeCalendar() {
 			$(".datepicker").css({"width":"440px"});
 			// 日期选择表
 			$(".datepicker-days thead tr").each(function (idx, elem){
 				if(idx == 0)	//标题高度不变
 					return;
-				$(this).css({"height":"50px"});
+				$(this).css({"height":tr_height});
 			});
 			// 月份选择表
 			$(".datepicker-months thead tr").each(function (idx, elem){
 				if(idx == 0)	//标题高度不变
 					return;
-				$(this).css({"height":"50px"});
+				$(this).css({"height":tr_height});
 			});
 			$(".datepicker-years thead tr").each(function (idx, elem){
 				if(idx == 0)	//标题高度不变
 					return;
-				$(this).css({"height":"50px"});
+				$(this).css({"height":tr_height});
 			});
 			$(".datepicker-decades thead tr").each(function (idx, elem){
 				if(idx == 0)	//标题高度不变
 					return;
-				$(this).css({"height":"50px"});
+				$(this).css({"height":tr_height});
 			});
 			$(".datepicker-centuries thead tr").each(function (idx, elem){
 				if(idx == 0)	//标题高度不变
 					return;
-				$(this).css({"height":"50px"});
+				$(this).css({"height":tr_height});
 			});
 			$(".table-condensed tbody tr").each(function (idx, elem){
-				$(this).css({"height":"50px"});
+				$(this).css({"height":tr_height});
 			});
 			$(".dow").each(function (idx, elem) {
 				$(this).css({"width":"60px"});
@@ -604,12 +610,14 @@
 					// 	return;
 
 					//alert("len: " + data.length)
-					let note_style = "style='font-size:x-small;'";
+					let prim_style = "style='margin-bottom:2px;'";
+					let note_style = "style='font-size:x-small; height:5px;'";
 					// 查询成功
 					$(".old.day").each(function (idx, elem) {
 						let txt = $(this).text();
 						let note = "&nbsp;";
-						$(this).html(txt + "<br><div " + note_style + ">" + note + "</div>");
+						$(this).html("<p " + prim_style + ">" + txt + 
+							"</p><p " + note_style + ">" + note + "</p>");
 					});
 					$(".day").not(".old").not(".new").each(function (idx, elem) {
 						// 添加样式
@@ -631,7 +639,8 @@
 								break;
 							}
 						}
-						$(this).html(txt + "<br><div " + note_style + ">" + note + "</div>");
+						$(this).html("<p " + prim_style + ">" + txt + 
+							"</p><p " + note_style + ">" + note + "</p>");
 						$(this).click(function(){
 							setTimeout(function () {
 								changeCalendarBody();
@@ -652,7 +661,8 @@
 					$(".new.day").each(function (idx, elem) {
 						let txt = $(this).text();
 						let note = "&nbsp;";
-						$(this).html(txt + "<br><div " + note_style + ">" + note + "</div>");
+						$(this).html("<p " + prim_style + ">" + txt + 
+							"</p><p " + note_style + ">" + note + "</p>");
 					});
 				},
 				error: function(){
@@ -663,7 +673,8 @@
 
 		function changeCalendarBody() {
 			setTimeout(function () {
-				$(".datepicker").css({"width":"440px"});
+				resizeCalendar();
+				// $(".datepicker").css({"width":"440px"});
 				// $(".day").each(function (idx, elem) {
 				// 	let txt = $(this).text();
 				// 	$(this).html(txt+"<br>");
@@ -831,6 +842,9 @@
 			tempCard.show();
 		});
 		$("#tabCalendar").on("click", function() {
+			// 更新日历信息
+			changeCalendarBody();
+
 	    	let tempCard = $("#cardCalendar");
 			let max_index = getMaxIndex(tempCard);
 			tempCard.css("z-index", max_index+1);	// 置顶

@@ -27,7 +27,7 @@ def hello_map():
 
 @map_bp.route('/portInfo', methods=['GET'])
 def get_port_info():
-    print("HelloHelloHelloHelloHelloHello")
+    #print("HelloHelloHelloHelloHelloHello")
     port = request.args.get("port")
     last_code = request.args.get("last_code")
     print(port)
@@ -35,6 +35,10 @@ def get_port_info():
     port_list = {
         "CNYSN": "上海-洋山 [CN]",
         "CNYAN": "烟台 [CN]",
+        "CNZHA": "湛江 [CN]",
+        "BRPDM": "马代拉角 [BR]",
+        "SGSGP": "新加坡 [SG]",
+        "DJDJI": "吉布提 [DJ]",
     }
 
     # 搜索匹配的key或value
