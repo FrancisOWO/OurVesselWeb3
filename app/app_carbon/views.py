@@ -158,8 +158,9 @@ def carbon_Transaction():
     # carbon_quota(str(Ship["中海才华"]), 24000)
     # carbon_quota(str(Ship["中海海王星"]), 28000)
     # carbon_quota("413798964", 12000)
-    # addCarbonTransaction(0, str(Ship["中海海王星"]), 50, 1000)
-    # addCarbonTransaction(1, str("413798964"), 45, 2000)
+    # addCarbonTransaction(0, str(Ship["中海海王星"]), 50, 500)
+    # addCarbonTransaction(1, str("413798964"), 45, 500)
+    # addCarbonTransaction(0, str(Ship["中海海王星"]), 49, 1000)
     main_ship = "中海才华"
     main_ship_mmsi = Ship[main_ship]
 
@@ -315,7 +316,9 @@ def addCarbonTransactionInfoAll(buyer, seller, price, number, statue):
     if res:
         tx_id = res["txId"]
         transaction = CarbonTransactionInfoALL(buyer, seller, price, number, tx_id)
+        transaction1 = CarbonTransactionInfoMyself(buyer, seller, price, number, tx_id)
         db.session.add(transaction)
+        db.session.add(transaction1)
         db.session.commit()
 
 #  碳排放配额

@@ -14,8 +14,8 @@ status = 0
 demolinks = [
     ['Hello 梧桐链！', 'hello'],
     ['用户信息', 'userinfo'],
-    ["地图", "map"],
-    ["碳排放", "carbon"],
+    ["港口查询", "map"],
+    ["船舶信息与能耗监测", "carbon"],
     ["碳交易", "carbon_transaction"],
     ]
 
