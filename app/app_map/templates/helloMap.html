@@ -313,6 +313,12 @@
 						alert(msg);
 						return;
 					}
+					//token过期
+					if(data.status == 401){
+						let msg = "认证令牌已过期，请参照【README.md】文件更新相关配置！！！";
+						alert(msg);
+						return;
+					}
 
 					// 清空所有标记
 					map.clearOverlays();
@@ -354,7 +360,8 @@
 					//map.centerAndZoom(new BMapGL.Point(106, 34), 8);
 				},
 				error: function(){
-					alert("ERROR: searchPort");
+					// alert("ERROR: searchPort");
+					alert("港口查询失败，未找到该港口信息！");
 				}
 			});
 		}
@@ -382,7 +389,12 @@
 						alert(msg);
 						return;
 					}
-					
+					// token过期
+					if(data.status == 401){
+						let msg = "认证令牌已过期，请参照【README.md】文件更新相关配置！！！";
+						alert(msg);
+						return;
+					}
 					// 清空所有标记
 					map.clearOverlays();
 
@@ -471,7 +483,8 @@
 						shape, "green", scale);
 				},
 				error: function(){
-					alert("ERROR: searchShip");
+					// alert("ERROR: searchShip");
+					alert("船舶查询失败，未找到该船舶信息！");
 				}
 			});
 		}
@@ -667,7 +680,8 @@
 					});
 				},
 				error: function(){
-					alert("ERROR: markHolidays");
+					// alert("ERROR: markHolidays");
+					alert("节假日查询失败，未找到该港口的节假日信息！");
 				}
 			});
 		}
@@ -705,6 +719,11 @@
 					"portCode": portCode
 				},
 				success: function(data){
+					if(data.status == false){
+						let msg = "天气查询失败，未查到该港口的天气信息！";
+						alert(msg);
+						return;
+					}
 
 					// 今日天气
 					let today = data.current;
@@ -751,8 +770,8 @@
 					$("#forecastDetail").html(fcontent);
 
 					// 画气温折线图
-                    var ctx = document.getElementById("easionChartjsLine").getContext('2d');
-                    var myChart = new Chart(ctx, {
+                    let ctx = document.getElementById("easionChartjsLine").getContext('2d');
+                    let myChart = new Chart(ctx, {
                         type: 'line',
                         data: {
 			                labels: dayWeekDescCn, // ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
@@ -813,9 +832,19 @@
 				            }
 			            }
                     });
+
+                    // 显示天气
+			    	let tempCard = $("#cardForecast");
+					let max_index = getMaxIndex(tempCard);
+					tempCard.css("z-index", max_index+1);	// 置顶
+					tempCard.show();
+
+                    return true;
 				},
 				error: function(){
-					alert("ERROR: fillForecast");
+					// alert("ERROR: fillForecast");
+					alert("天气查询失败，未找到该港口的天气信息！");
+					return false;
 				}
 			});
 	    }
@@ -835,12 +864,8 @@
 		});
 
 		$("#tabForecast").on("click", function() {
+	    	// 查询失败则不显示天气信息
 	    	fillForecast();
-
-	    	let tempCard = $("#cardForecast");
-			let max_index = getMaxIndex(tempCard);
-			tempCard.css("z-index", max_index+1);	// 置顶
-			tempCard.show();
 		});
 		$("#tabCalendar").on("click", function() {
 			// 更新日历信息

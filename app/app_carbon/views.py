@@ -1,10 +1,10 @@
-from flask import render_template, redirect, url_for  # , flash, redirect, url_for
+from flask import render_template, redirect, url_for, flash
 from app import app, login
 from app.app_carbon import carbon_bp
 from .models import *
 from .forms import *
 from app.utils import wutongchain as wtc
-from app.app_demo import demolinks  # 导航栏链接
+from app.app_demo import demolinks, MSG_TOKEN_ERR  # 导航栏链接
 import app.utils.myvessel as mvsl
 import json
 
@@ -134,6 +134,12 @@ def carbon_BaseInfo():
         }
         ship_sail_output_data = mvsl.get_shipSailData_by_code(ship_sail_input_data)
         ok_flag = (ship_sail_output_data != None)
+
+    # token过期，重定向到主页
+    if not ok_flag:
+        flash(MSG_TOKEN_ERR)
+        return redirect(url_for("demo.demotest", demoname="hello"))
+        # return redirect(url_for("account.index"))
 
     main_ship = "中海才华"
     return render_template(

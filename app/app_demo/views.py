@@ -11,6 +11,8 @@ import app.utils.myvessel as mvsl
 global status
 status = 0
 
+MSG_TOKEN_ERR = "认证令牌已过期，请参照【README.md】文件更新相关配置！！！"
+
 demolinks = [
     ['梧桐链浏览器', 'hello'],
     # ['用户信息', 'userinfo'],

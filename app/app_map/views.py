@@ -1,12 +1,12 @@
 import json
 
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, flash, redirect, url_for
 from app import app, login
 from app.app_map import map_bp
 from .models import *
 from .forms import *
 
-from app.app_demo import demolinks # 导航栏链接
+from app.app_demo import demolinks, MSG_TOKEN_ERR # 导航栏链接
 from app.utils.config import ak
 
 from app.app_carbon import Ship
@@ -56,22 +56,26 @@ def get_port_info():
     if port_code == None:
         return jsonify(err_ret)
 
-    # 和上次查询的港口一样，不重复查询
-    if port_code == last_code:
-        print("#### 无需重复查询 ####")
-        return jsonify({"status": "same"})
-
     print(port_code, port_name)
 
     # 根据港口代码请求港口信息
     port_info = mvsl.get_port_by_code(port_code)
     print(port_info)
 
-    # 请求失败
+    # 请求失败，提示认证过期
     if port_info == None:
+        err_ret["status"] = 401
         return jsonify(err_ret)
+        # flash(MSG_TOKEN_ERR)
+        # return redirect(url_for("demo.demotest", demoname="hello"))
 
     port_info["status"] = True
+
+    # 和上次查询的港口一样，静态信息无需重复设置
+    if port_code == last_code:
+        print("#### 无需重复设置信息 ####")
+        port_info["status"] = "same"
+
     return jsonify(port_info)
 
 
@@ -105,8 +109,12 @@ def get_forecast():
 
     # 根据港口代码请求港口信息
     forecast = mvsl.get_forecast([portCode])
-    print(forecast["current"]["windDegCn"])
+    if forecast == None:
+        err_ret = {"status": False}
+        return jsonify(err_ret)
 
+    forecast["status"] = True
+    print(forecast["current"]["windDegCn"])
     return jsonify(forecast)
 
 
@@ -128,11 +136,6 @@ def get_ship_info():
     err_ret = {"status": False}
     if ship_name == None:
         return jsonify(err_ret)
-
-    # 和上次查询的港口一样，不重复查询
-    if ship_mmsi == last_mmsi:
-        print("#### 无需重复查询 ####")
-        return jsonify({"status": "same"})
 
     print(ship_mmsi, ship_name)
 
@@ -172,12 +175,23 @@ def get_ship_info():
     # print(ship_track_output_data)
     # print(ship_track_predict_output_data)
     
-    # 字典合并
-    ship_info.update(ship_status)
-    print(ship_info)
+    if ok_flag:
+        # 字典合并
+        ship_info.update(ship_status)
+        print(ship_info)
 
-    ship_info["ship_track_history"] = ship_track_output_data
-    ship_info["ship_track_predict"] = ship_track_predict_output_data
-    ship_info["status"] = True
+        ship_info["ship_track_history"] = ship_track_output_data
+        ship_info["ship_track_predict"] = ship_track_predict_output_data
+        ship_info["status"] = True
+
+        # 和上次查询的船舶一样，无需更新静态信息，只更新船舶位置
+        if ship_mmsi == last_mmsi:
+            print("#### 只更新船舶位置 ####")
+            ship_info["status"] = "same"
+
+    # 请求失败，认证过期
+    if not ok_flag:
+        err_ret["status"] = 401
+        return jsonify(err_ret)
     
     return jsonify(ship_info)

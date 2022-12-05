@@ -22,8 +22,7 @@
 		{% with messages = get_flashed_messages() %}
 		{% for message in messages %}
 		<div class="alert alert-info alert-dismissable" role="alert">
-			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;
-			</button>
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
 			{{ message }}
 		</div>
 		{% endfor %}
