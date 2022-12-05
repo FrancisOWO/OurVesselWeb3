@@ -1,14 +1,14 @@
 
 // let map = new BMapGL.Map("allmap");		// 创建Map实例
 
-
 function drawPolyTrack(map, id, p_list, color){
+
 	let BMap_p_list = [];
 	for(let i = 0; i<p_list.length; i++){
 		BMap_p_list.push(new BMapGL.Point(p_list[i][0], p_list[i][1]));
 	}
 	let track = new BMapGL.Polyline(BMap_p_list,
-		{strokeColor:color, strokeWeight:2, strokeOpacity:0.5});
+		{strokeColor:color, strokeWeight:3, strokeOpacity:0.8});
 	// {strokeColor:"green", strokeWeight:2, strokeOpacity:0.5});
 	track.id = id;
 	map.addOverlay(track);
@@ -48,6 +48,16 @@ function getMarkerIcon(shape, color, scale) {
 	let iconPath = "/static/images/allStyleMarker.png";
 	let img_w = 144, img_h = 92;
 
+	let shape_dict = {
+		"pin":0, "circ":1, "flag":2
+	};
+	let color_dict = {
+		"green":0, "blue":1, "red":2,
+		"yellow":3, "purple":4, "pink":5
+	};
+	shape = shape_dict[shape];
+	color = color_dict[color];
+
 	let icon_w = [10, 18, 16];
 	let icon_h = [22, 26, 18];
 	let icon_hsum = [0, 22, 48];
@@ -69,15 +79,19 @@ function getMarkerIcon(shape, color, scale) {
 }
 
 // 在当前位置添加标注
-function markCurrentPoint(map, lng, lat, label) {
+function markCurrentPoint(map, lng, lat, m_id, label, shape, color, scale) {
 
-	// 当前点：红色 同心圆
-	let shape = 1; color = 2, scale = 1.2;
+	// 当前点：同心圆 红色
+	// let shape = "circ", color = "red", scale = 1.2;
+	shape = typeof(shape) == 'undefined' ? "circ" : shape;
+	color = typeof(color) == 'undefined' ? "red" : color;
+	scale = typeof(scale) == 'undefined' ? 1.2 : scale;
+
 	let iconCur = getMarkerIcon(shape, color, scale);
 
 	// 若标注已存在则移除
-	let m_cur_id = "m_cur";
-	removeOverlayByID(map, m_cur_id);
+	// let m_cur_id = "m_cur";
+	removeOverlayByID(map, m_id);
 
 	let p_cur = new BMapGL.Point(lng, lat);
 	// 当前位置标注
@@ -85,10 +99,33 @@ function markCurrentPoint(map, lng, lat, label) {
 		"enableDragging": false,
 		"icon": iconCur
 	});
-	m_cur.id = m_cur_id;
+	m_cur.id = m_id;
 	
 	m_cur.setLabel(new BMapGL.Label(label));
 	map.addOverlay(m_cur);			// 在地图上添加标注
+}
+
+
+// 给一列点添加标注
+function markPointList(map, p_list, shape, color, scale, npoints){
+	// 只画npoints个点
+	let gap = 1;
+	if(npoints > 0 && npoints < p_list.length)
+		gap = parseInt(p_list.length/npoints);
+
+	// alert("len:" + p_list.length + ", gap:" + gap);
+
+	// 获取图标
+	let iconCur = getMarkerIcon(shape, color, scale);
+	for(let i = 0; i<p_list.length; i+=gap){
+		let p_cur = new BMapGL.Point(p_list[i][0], p_list[i][1]);
+		let m_cur = new BMapGL.Marker(p_cur, {
+			"enableDragging": false,
+			"icon": iconCur
+		});
+		map.addOverlay(m_cur);			// 在地图上添加标注
+	}
+	return true;
 }
 
 
@@ -116,27 +153,13 @@ function showBMap(map){
 	let icon_h = [22, 27, 18];
 	let icon_hsum = [0, 22, 49];
 
-	// 起点：蓝色 同心圆
-	let shape = 1, color = 1, scale = 1.2;
-	// let iconCircSize = new BMapGL.Size(icon_w[shape], icon_h[shape]);
-	// let iconFrom = new BMapGL.Icon(iconPath, iconCircSize, {
-	// 	// 图标相对鼠标点击的位置
-	// 	"anchor": new BMapGL.Size(icon_w[shape]/2, icon_h[shape]),
-	// 	// 图标在allStyleMarker.png中的位置
-	// 	"imageOffset": new BMapGL.Size(color*icon_w[shape], icon_hsum[shape])
-	// });
-	// iconFrom.setImageSize(scale*icon_w[shape], scale*icon_h[shape]);
+	// 起点：同心圆 蓝色
+	let shape = "circ", color = "blue", scale = 1.2;
 	iconFrom = getMarkerIcon(shape, color, scale);
 
-	// 终点：红色 同心圆
-	color = 2;
+	// 终点：同心圆 红色
+	color = "red";
 	iconTo = getMarkerIcon(shape, color, scale);
-	// let iconTo = new BMapGL.Icon(iconPath, iconCircSize, {
-	// 	"anchor": new BMapGL.Size(icon_w[shape]/2, icon_h[shape]),
-	// 	"imageOffset": new BMapGL.Size(color*icon_w[shape], icon_hsum[shape])
-	// });
-	// iconTo.setImageSize(scale*icon_w[shape], scale*icon_h[shape]);
-
 
 	let m_from_id = "m_from";
 	let m_to_id = "m_to";

@@ -21,12 +21,19 @@ def get_url_prefix():
 
 
 # 经纬度【小数（十进制）=>度/分/秒（60进制）】
-def cvtDec2B60(dec):
+def cvtDec2B60(dec, suffix):
+    if dec < 0:
+        if suffix == "N":
+            suffix = "S"
+        elif suffix == "E":
+            suffix = "W"
+        dec = -dec
+
     r = int(dec)
     dec = 60*(dec-r)
     m = int(dec)
     s = int(60*(dec-m))
-    return f"{r}°{m}′{s}″"
+    return f"{r}°{m}′{s}″", suffix
 
 
 '''
@@ -52,6 +59,12 @@ def get_port_by_code(port_code):
         return None
 
     res_dict = res.json()["data"]
+
+    lonStr, suffix = cvtDec2B60(res_dict["lon"], "E")   # 经度
+    lonStr = f"{lonStr} {suffix}"
+    latStr, suffix = cvtDec2B60(res_dict["lat"], "N")   # 纬度
+    latStr = f"{latStr} {suffix}"
+
     my_dict = {
         "portCode": res_dict["portCode"],  # "CNYAN",
         "nameCn": res_dict["nameCn"],  # "烟台",
@@ -62,8 +75,8 @@ def get_port_by_code(port_code):
         # "namePinyin": res_dict["namePinyin"],	# "YANTAI",
         "lon": res_dict["lon"],  # 121.400000,
         "lat": res_dict["lat"],  # 37.550000,
-        "lonStr": cvtDec2B60(res_dict["lon"]),  # 121°24′00″,
-        "latStr": cvtDec2B60(res_dict["lat"]),  # 37°33′00″,
+        "lonStr": lonStr,  # 121°24′00″,
+        "latStr": latStr,  # 37°33′00″,
     }
     return my_dict
 
@@ -173,12 +186,19 @@ def get_shipStatus_by_code(ship_mmsi):
 
     res_dict = res.json()["data"]
 
+    lonStr, suffix = cvtDec2B60(res_dict["lon"], "E")   # 经度
+    lonStr = f"{lonStr} {suffix}"
+    latStr, suffix = cvtDec2B60(res_dict["lat"], "N")   # 纬度
+    latStr = f"{latStr} {suffix}"
+
     ship_status = {
         "mmsi": res_dict["mmsi"],  # 船舶mmsi
         "statusTime": res_dict["statusTime"],
         "startPostime": res_dict["startPostime"],
         "lon": res_dict["lon"],
         "lat": res_dict["lat"],
+        "lonStr": lonStr,
+        "latStr": latStr,
         "legStartPortCode": res_dict["legStartPortCode"],
         "legStartPortNameCn": res_dict["legStartPortNameCn"],
         "legStartPortCtryCode": res_dict["legStartPortCtryCode"],

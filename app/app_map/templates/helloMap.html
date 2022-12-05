@@ -48,7 +48,7 @@
 	                    <div id="closePort" role="button" style="margin-left: 30px;"> &times; </div>
 	                </div>
 	                <div class="card-body ">
-	                	<h5 style="margin-bottom: 15px;"> 港口信息 </h5>
+	                	<h5 style="margin-bottom:15px; font-weight:bold;"> 港口信息 </h5>
 	                	<table id="tblPort">
 	                		<thead>
 		                		<tr>
@@ -109,7 +109,26 @@
 	                    <div id="closeVessel" role="button" style="margin-left: 30px;"> &times; </div>
 	                </div>
 	                <div class="card-body">
-	                	<h5 style="margin-bottom: 15px;"> 船舶信息 </h5>
+	                	<h5 style="margin-bottom:15px; font-weight:bold; display:inline;"> 船舶信息 </h5>
+	                	<span style="color:red; font-weight:bold;">
+		                	<span>&nbsp;&nbsp;&nbsp;当前位置:&nbsp;</span>
+		                	<span id="curCoords"></span>
+		                </span>
+	                	<div style="height:50px; font-size:x-large; font-weight:bold; margin-top:10px">
+	                		<span style="color:blue;">
+		                		<span id="legStartPortNameCn">起点</span>
+		                		<span>【</span>
+		                		<span id="legStartPortCtryCode">AA</span>
+		                		<span>】</span>
+		                	</span>
+	                		<span>&nbsp;<i class="fas fa-angle-double-right"></i>&nbsp;</span>
+	                		<span style="color:green;">
+		                		<span id="legEndPortNameCn">终点</span>
+		                		<span>【</span>
+		                		<span id="legEndPortCtryCode">BB</span>
+		                		<span>】</span>
+		                	</span>
+	                	</div>
 	                	<table id="tblVessel">
 	                		<thead>
 		                		<tr>
@@ -252,9 +271,13 @@
 	$(document).ready(function () {
 		// 百度地图
 		let map = new BMapGL.Map("allmap");	// 创建Map实例
+		let m_cur_id = "m_cur", m_start_id = "m_start", m_end_id = "m_end";
 		showBMap(map);
 
 		$("#searchType").text("port");
+		$("#txtSearch").attr("placeholder", "输入港口");
+		$("#btnSearchType").show();
+		$("#searchPortIcon").show();
 
 		function getMaxIndex(obj) {
 			let elems = obj.siblings();
@@ -313,7 +336,7 @@
 					$("#nameEn").text(data.nameEn);
 					$("#portCode").text(data.portCode);
 
-					let coords = data.latStr + " N, " + data.lonStr + " E";
+					let coords = data.latStr + ", " + data.lonStr;
 					$("#portCoords").text(coords);
 
 					tempCard.css("z-index", max_index+1);	// 置顶
@@ -321,7 +344,7 @@
 
 					// 地图标记
 					mapCenterAndZoom(map, data.lon, data.lat, 11)
-					markCurrentPoint(map, data.lon, data.lat, data.nameCn);
+					markCurrentPoint(map, data.lon, data.lat, m_cur_id, data.nameCn);
 					//map.centerAndZoom(new BMapGL.Point(106, 34), 8);
 				},
 				error: function(){
@@ -382,6 +405,24 @@
 					$("#buildYearMonth").text(data.buildYearMonth);
 					$("#draught_speed").text(data.draught_speed);
 
+					// 起点【AA】 → 终点【BB】
+					$("#legStartPortNameCn").text(data.legStartPortNameCn);
+					$("#legStartPortCtryCode").text(data.legStartPortCtryCode);
+					$("#legEndPortNameCn").text(data.legEndPortNameCn);
+					$("#legEndPortCtryCode").text(data.legEndPortCtryCode);
+
+					// 经纬度坐标转换
+					// let latStr = data.lat + " N";
+					// if(data.lat < 0)
+					// 	latStr = -data.lat + " S";
+
+					// let lonStr = data.lon + " N";
+					// if(data.lon < 0)
+					// 	lonStr = -data.lon + " W";
+
+					let coords = data.latStr + ", " + data.lonStr;
+					$("#curCoords").text(coords);
+
 					tempCard.css("z-index", max_index+1);	// 置顶
 					tempCard.show();
 
@@ -389,14 +430,36 @@
 					let m_ship_track_id = "ship_track";
 					removeOverlayByID(map, m_ship_track_id);
 
-					p_list = [[106, 34],[125, 45],[136, 74]];
-					color = "blue";
-					drawPolyTrack(map, m_ship_track_id, p_list, color);
+					// p_list = [[106, 34],[125, 45],[136, 74]];
+					// drawPolyTrack(map, m_ship_track_id, data.p_list, "blue");
 
-					// 地图标记
-					// mapCenterAndZoom(map, data.lon, data.lat, 11)
-					// markCurrentPoint(map, data.lon, data.lat, data.nameCn);
-					// map.centerAndZoom(new BMapGL.Point(106, 34), 8);
+					// 已经过的路线
+					drawPolyTrack(map, m_ship_track_id, data.ship_track_history, "blue");
+					// 预测路线，加入当前点
+					let track_predict = [[data.lon, data.lat], ...data.ship_track_predict]
+					drawPolyTrack(map, m_ship_track_id, track_predict, "green");
+
+					// 标记途经点
+					// 一共n个点，只标记npoints个点
+					let npoints = 20;
+					let shape = "flag", scale = 1.2;
+					markPointList(map, data.ship_track_history, shape, "blue", scale, npoints);
+					markPointList(map, data.ship_track_predict, shape, "green", scale, npoints);
+
+					// 聚焦当前位置
+					map.centerAndZoom(new BMapGL.Point(data.lon, data.lat), 4);
+					markCurrentPoint(map, data.lon, data.lat, m_cur_id, "当前位置");
+
+					let start_label = "起点: " + data.legStartPortNameCn;
+					let end_label = "终点: " + data.legEndPortNameCn;
+					let p_start = data.ship_track_history[0];
+					let p_end = data.ship_track_predict[data.ship_track_predict.length-1];
+
+					shape = "circ";
+					markCurrentPoint(map, p_start[0], p_start[1], m_start_id, start_label,
+						shape, "blue", scale);
+					markCurrentPoint(map, p_end[0], p_end[1], m_end_id, end_label,
+						shape, "green", scale);
 				},
 				error: function(){
 					alert("ERROR: searchShip");

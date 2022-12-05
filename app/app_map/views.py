@@ -138,7 +138,7 @@ def get_ship_info():
     # 要判断返回是否为 None，再进行下一步！！！
     ok_flag = (ship_info != None and ship_status != None)
 
-    ship_track_output_data = {}
+    ship_track_output_data = None
     if ok_flag:
         # 获取船舶历史轨迹数据
         ship_track_input_data = {
@@ -153,7 +153,7 @@ def get_ship_info():
         ship_track_output_data = mvsl.get_shipTrackList_by_code(ship_track_input_data)
         ok_flag = (ship_track_output_data != None)
 
-    ship_track_predict_output_data = {}
+    ship_track_predict_output_data = None
     if ok_flag:
         # 获取船舶预测轨迹
         ship_track_predict_input_data = {
@@ -167,6 +167,9 @@ def get_ship_info():
 
     # print(ship_track_output_data)
     # print(ship_track_predict_output_data)
+    
+    # 字典合并
+    ship_info.update(ship_status)
     print(ship_info)
 
     ship_info["ship_track_history"] = ship_track_output_data
