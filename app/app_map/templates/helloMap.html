@@ -620,13 +620,14 @@
 							"</p><p " + note_style + ">" + note + "</p>");
 					});
 					$(".day").not(".old").not(".new").each(function (idx, elem) {
-						// 添加样式
-						let txt = $(this).text();
+						// 防止txt不断拼接，只取最前面的数字！！！
+						let txt = parseInt($(this).text());
 						let note = "&nbsp;";
 						let holidays_html = "<p>无假期信息</p>";
+						$(this).removeClass("holiday");		// 恢复非节假日样式
 						for(let i=0; i < data.length; i++){
 							if(1+idx == data[i]["dateDay"]){
-								$(this).addClass("holiday");
+								$(this).addClass("holiday");	// 添加样式
 								note = "节假日";
 								let holidays = data[i]["holidays"];
 								holidays_html = "<p>假期信息:</p>"
