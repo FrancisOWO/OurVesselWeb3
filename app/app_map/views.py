@@ -9,6 +9,8 @@ from .forms import *
 from app.app_demo import demolinks # 导航栏链接
 from app.utils.config import ak
 
+from app.app_carbon import Ship
+
 import app.utils.wutongchain as wtc
 import app.utils.myvessel as mvsl
 
@@ -34,25 +36,19 @@ def get_port_info():
         "CNYSN": "上海-洋山 [CN]",
         "CNYAN": "烟台 [CN]",
     }
-    err_ret = {"status": False}
 
     # 搜索匹配的key或value
     port_code = None
     port_name = None
     for key in port_list.keys():
-        # 港口代码
-        if port == key:
-            port_code = key
-            port_name = port_list[key]
-            break
-
-        # 模糊搜索，字符串在完整名称中
-        if port in port_list[key]:
+        # 搜索内容==港口代码 或 搜索内容在完整名称中(模糊搜索)
+        if (port == key) or (port in port_list[key]):
             port_code = key
             port_name = port_list[key]
             break
 
     # 什么都没找到
+    err_ret = {"status": False}
     if port_code == None:
         return jsonify(err_ret)
 
@@ -108,3 +104,73 @@ def get_forecast():
     print(forecast["current"]["windDegCn"])
 
     return jsonify(forecast)
+
+
+@map_bp.route("/shipInfo", methods=['GET'])
+def get_ship_info():
+    content = request.args.get("ship")
+    last_mmsi = request.args.get("last_mmsi")
+
+    ship_name = None
+    ship_mmsi = None
+    for key in Ship.keys():
+        # 搜索内容在完整名称中(模糊搜索) 或 搜索内容==mmsi
+        if (content in key) or (content == str(Ship[key])):
+            ship_name = key
+            ship_mmsi = Ship[key]
+            break
+
+    # 什么都没找到
+    err_ret = {"status": False}
+    if ship_name == None:
+        return jsonify(err_ret)
+
+    # 和上次查询的港口一样，不重复查询
+    if ship_mmsi == last_mmsi:
+        print("#### 无需重复查询 ####")
+        return jsonify({"status": "same"})
+
+    print(ship_mmsi, ship_name)
+
+    ship_info = mvsl.get_shipInfo_by_code(ship_mmsi)
+    ship_status = mvsl.get_shipStatus_by_code(ship_mmsi)
+
+    # 要判断返回是否为 None，再进行下一步！！！
+    ok_flag = (ship_info != None and ship_status != None)
+
+    ship_track_output_data = {}
+    if ok_flag:
+        # 获取船舶历史轨迹数据
+        ship_track_input_data = {
+            "mmsi": ship_info["mmsi"],
+            "startTime": ship_status["startPostime"],
+            "endTime": ship_status["statusTime"],
+            "sparse": 1,
+            "withWeather": 0,
+        }
+
+        # print(mvsl.get_shipStatus_by_code(Ship["中海才华"]))
+        ship_track_output_data = mvsl.get_shipTrackList_by_code(ship_track_input_data)
+        ok_flag = (ship_track_output_data != None)
+
+    ship_track_predict_output_data = {}
+    if ok_flag:
+        # 获取船舶预测轨迹
+        ship_track_predict_input_data = {
+            "mmsi": ship_info["mmsi"],
+            "dest": ship_status["legEndPortCode"],
+            "speed": ship_status["calculateSpeed"],
+            "softLink": True,
+        }
+        ship_track_predict_output_data = mvsl.get_shipTrackPredictList_by_code(ship_track_predict_input_data)
+        ok_flag = (ship_track_predict_output_data != None)
+
+    # print(ship_track_output_data)
+    # print(ship_track_predict_output_data)
+    print(ship_info)
+
+    ship_info["ship_track_history"] = ship_track_output_data
+    ship_info["ship_track_predict"] = ship_track_predict_output_data
+    ship_info["status"] = True
+    
+    return jsonify(ship_info)

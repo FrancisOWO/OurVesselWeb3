@@ -104,7 +104,7 @@ def get_shipInfo_by_code(ship_mmsi):
 
     my_dict = {
         "mmsi": res_dict["mmsi"],  # 船舶mmsi
-        "载重吨": res_dict["dwt"],  # 船舶载重吨
+        "dwt": res_dict["dwt"],  # 船舶载重吨
         "length_width_height": str(res_dict["length"]) + "m*" + str(res_dict["width"]) + "m*" + str(
             res_dict["height"]) + "m",  # 船舶长宽高
         "buildYearMonth": res_dict["buildYearMonth"][:4] + "-" + res_dict["buildYearMonth"][-2:],
@@ -112,6 +112,12 @@ def get_shipInfo_by_code(ship_mmsi):
         "ship_type": res_dict["vesselSub2TypeNameCn"],
         "ship_nameCn": res_dict["nameCn"],
         "ship_nameEn": res_dict["nameEn"],
+
+        "vesselTypeNameCn": res_dict["vesselTypeNameCn"],   # 船舶类型：干散货
+        "operatorBodyCn": res_dict["operatorBodyCn"],       # 所属公司：中远海运散货运输有限公司
+        "vesselTypeFullNameCn": res_dict["vesselTypeFullNameCn"],   # 船舶类型全称
+        "imo": res_dict["imo"],           # imo
+        "callsign": res_dict["callsign"], # 呼号
     }
     return my_dict
 
@@ -233,6 +239,28 @@ def get_shipTrack_by_code(data):
     return lon_lat_list
 
 
+# 返回坐标列表，而不是字符串
+def get_shipTrackList_by_code(data):
+    # url
+    url = f"{URL_PREFIX}/sdc/v1/vessels/status/track"
+    # 请求头：没有【User-Agent】会返回405
+    headers = {
+        'Content-Type': 'application/json',
+        "User-Agent": "PostmanRuntime/7.29.2",
+        "Authorization": HEADER_AUTHORIZATION
+    }
+    # 发送请求
+    res = requests.post(url=url, data=json.dumps(data), headers=headers)
+    if res.status_code != 200:
+        print(res)
+        return None
+    res_dict = res.json()["data"]
+    lon_lat_list = []
+    for lon_lat in res_dict:
+        lon_lat_list.append([lon_lat["lon"], lon_lat["lat"]])
+    return lon_lat_list
+
+
 '''
 API 	: sdc/v1/routes/predict
 请求方式	: POST
@@ -260,6 +288,28 @@ def get_shipTrackPredict_by_code(data):
     lon_lat_list = []
     for lon_lat in res_dict:
         lon_lat_list.append(str(lon_lat["lon"]) + " " + str(lon_lat["lat"]))
+    return lon_lat_list
+
+
+# 返回坐标列表，而不是字符串
+def get_shipTrackPredictList_by_code(data):
+    # url
+    url = f"{URL_PREFIX}/sdc/v1/routes/predict"
+    # 请求头：没有【User-Agent】会返回405
+    headers = {
+        'Content-Type': 'application/json',
+        "User-Agent": "PostmanRuntime/7.29.2",
+        "Authorization": HEADER_AUTHORIZATION
+    }
+    # 发送请求
+    res = requests.post(url=url, data=json.dumps(data), headers=headers)
+    if res.status_code != 200:
+        print(res)
+        return None
+    res_dict = res.json()["data"]["restPointsOnLine"]
+    lon_lat_list = []
+    for lon_lat in res_dict:
+        lon_lat_list.append([lon_lat["lon"],lon_lat["lat"]])
     return lon_lat_list
 
 

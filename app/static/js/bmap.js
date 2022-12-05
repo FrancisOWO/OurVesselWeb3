@@ -1,6 +1,19 @@
 
 // let map = new BMapGL.Map("allmap");		// 创建Map实例
 
+
+function drawPolyTrack(map, id, p_list, color){
+	let BMap_p_list = [];
+	for(let i = 0; i<p_list.length; i++){
+		BMap_p_list.push(new BMapGL.Point(p_list[i][0], p_list[i][1]));
+	}
+	let track = new BMapGL.Polyline(BMap_p_list,
+		{strokeColor:color, strokeWeight:2, strokeOpacity:0.5});
+	// {strokeColor:"green", strokeWeight:2, strokeOpacity:0.5});
+	track.id = id;
+	map.addOverlay(track);
+}
+
 // 根据id查找覆盖物
 function findOverlayByID(map, id) {
 	let allOverlay = map.getOverlays();
