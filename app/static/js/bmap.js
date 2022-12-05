@@ -36,6 +36,7 @@ function removeOverlayByID(map, id) {
 	return true;
 }
 
+
 function mapCenterAndZoom(map, lng, lat, zoom) {
 	map.centerAndZoom(new BMapGL.Point(lng, lat), zoom);
 }
@@ -193,56 +194,56 @@ function showBMap(map){
 	                map.zoomOut();
 	            }
 	        },
-	        {
-	        	text:"设为起点",
-	        	callback: function() {
-	        		// 若标注、轨迹已存在则移除
-	        		removeOverlayByID(map, m_from_id);
-	        		removeOverlayByID(map, track_id);
+	    //     {
+	    //     	text:"设为起点",
+	    //     	callback: function() {
+	    //     		// 若标注、轨迹已存在则移除
+	    //     		removeOverlayByID(map, m_from_id);
+	    //     		removeOverlayByID(map, track_id);
 
-					// 起点标注
-					let m_from = new BMapGL.Marker(p_click, {
-						"enableDragging": true,
-						"icon": iconFrom
-					});
-					m_from.id = m_from_id;
+					// // 起点标注
+					// let m_from = new BMapGL.Marker(p_click, {
+					// 	"enableDragging": true,
+					// 	"icon": iconFrom
+					// });
+					// m_from.id = m_from_id;
 					
-					m_from.setLabel(new BMapGL.Label("起点"));
-					map.addOverlay(m_from);			// 在地图上添加标注
+					// m_from.setLabel(new BMapGL.Label("起点"));
+					// map.addOverlay(m_from);			// 在地图上添加标注
 
-					p_from =  m_from.getPosition();
-					// alert('【起点】经纬度：' + p_from.lng + ', ' + p_from.lat);
+					// p_from =  m_from.getPosition();
+					// // alert('【起点】经纬度：' + p_from.lng + ', ' + p_from.lat);
 
-					// 终点存在，则画线
-					if(findOverlayByID(map, m_to_id) != false)
-						drawTrack(p_from, p_to);
-	        	}
-	        },
-	        {
-	        	text:"设为终点",
-	        	callback: function() {
-	        		// 若标注、轨迹已存在则移除
-	        		removeOverlayByID(map, m_to_id);
-	        		removeOverlayByID(map, track_id);
+					// // 终点存在，则画线
+					// if(findOverlayByID(map, m_to_id) != false)
+					// 	drawTrack(p_from, p_to);
+	    //     	}
+	    //     },
+	    //     {
+	    //     	text:"设为终点",
+	    //     	callback: function() {
+	    //     		// 若标注、轨迹已存在则移除
+	    //     		removeOverlayByID(map, m_to_id);
+	    //     		removeOverlayByID(map, track_id);
 
-					// 终点标注
-					let m_to = new BMapGL.Marker(p_click, {
-						"enableDragging": true,
-						"icon": iconTo
-					});
-					m_to.id = m_to_id;
+					// // 终点标注
+					// let m_to = new BMapGL.Marker(p_click, {
+					// 	"enableDragging": true,
+					// 	"icon": iconTo
+					// });
+					// m_to.id = m_to_id;
 					
-					m_to.setLabel(new BMapGL.Label("终点"));
-					map.addOverlay(m_to);			// 在地图上标注
+					// m_to.setLabel(new BMapGL.Label("终点"));
+					// map.addOverlay(m_to);			// 在地图上标注
 
-					p_to =  m_to.getPosition();
-					// alert('【终点】经纬度：' + p_to.lng + ', ' + p_to.lat);
+					// p_to =  m_to.getPosition();
+					// // alert('【终点】经纬度：' + p_to.lng + ', ' + p_to.lat);
 
-					// 起点存在，则画线
-					if(findOverlayByID(map, m_from_id) != false)
-						drawTrack(p_from, p_to);
-	        	}
-	        },
+					// // 起点存在，则画线
+					// if(findOverlayByID(map, m_from_id) != false)
+					// 	drawTrack(p_from, p_to);
+	    //     	}
+	    //     },
 	    ];
 
 	let menu = new BMapGL.ContextMenu();

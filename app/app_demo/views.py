@@ -12,8 +12,8 @@ global status
 status = 0
 
 demolinks = [
-    ['Hello 梧桐链！', 'hello'],
-    ['用户信息', 'userinfo'],
+    ['梧桐链浏览器', 'hello'],
+    # ['用户信息', 'userinfo'],
     ["港口与船舶查询", "map"],
     ["船舶信息与能耗监测", "carbon"],
     ["碳交易", "carbon_transaction"],
@@ -45,13 +45,12 @@ def HelloWTC():
         "洋山港": "CNYSN",
         "烟台港": "CNYAN",
     }
-    # info_yangshan = 
 
-    text_list = ["Hello Hello Hi Hi Hi",
+    text_list = ["Hello 梧桐链！！！",
         f"区块浏览器: {wtc.get_browser_url()}",
         f"应用链: {wtc.get_ledger_name()}",
         f"当前区块高度: {wtc.get_block_height()}",
-        f"洋山港: {mvsl.get_port_by_code(port_list['洋山港'])}",
+        # f"洋山港: {mvsl.get_port_by_code(port_list['洋山港'])}",
         # f"天气: {mvsl.get_forecast([port_list['洋山港']])}",
         ]
 

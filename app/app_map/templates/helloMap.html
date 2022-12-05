@@ -101,8 +101,8 @@
                                 <a class="easion-card-menu-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
-                                    <a class="dropdown-item" id="tabCarbonInfo">碳排放</a>
-                                    <a class="dropdown-item" id="tabCarbonTx">碳交易</a>
+                                    <a class="dropdown-item" href="{{url_for('carbon.carbon_BaseInfo')}}">能耗监测</a>
+                                    <a class="dropdown-item" href="{{url_for('carbon.carbon_Transaction')}}">碳交易</a>
                                 </div>
                             </div>
                         </div>
@@ -296,7 +296,7 @@
 			if(content.length < 1)
 				return;
 			
-			let url_get_port_info = "{{ url_for('map.get_port_info' )}}";
+			let url_get_port_info = "{{ url_for('map.get_port_info') }}";
 			//alert(content+" "+url_get_port_info);
 			
 			$.ajax({
@@ -314,32 +314,32 @@
 						return;
 					}
 
+					// 清空所有标记
+					map.clearOverlays();
+
+					// 静态信息，和上次查询的港口不一样则重新设置；一样则无需重复设置
+					if(data.status != "same"){
+						let portName = data.nameCn + " - " + data.nameEn;
+						$("#portName").text(portName);
+
+						let ctryName = data.ctryNameCn + " - " + data.ctryNameEn;
+						$("#ctryName").text(ctryName);
+						$("#ctryCode").text(data.ctryCode);
+
+						$("#nameCn").text(data.nameCn);
+						$("#nameEn").text(data.nameEn);
+						$("#portCode").text(data.portCode);
+
+						let coords = data.latStr + ", " + data.lonStr;
+						$("#portCoords").text(coords);
+					}
+
 					// 找最顶层的card
 					let tempCard = $("#cardPort");
 					let max_index = getMaxIndex(tempCard);
 
-					// 和上次查询一样，无需重复设置
-					if(data.status == "same"){
-						tempCard.css("z-index", max_index+1);	// 置顶
-						tempCard.show();
-						return;
-					}
-
-					let portName = data.nameCn + " - " + data.nameEn;
-					$("#portName").text(portName);
-
-					let ctryName = data.ctryNameCn + " - " + data.ctryNameEn;
-					$("#ctryName").text(ctryName);
-					$("#ctryCode").text(data.ctryCode);
-
-					$("#nameCn").text(data.nameCn);
-					$("#nameEn").text(data.nameEn);
-					$("#portCode").text(data.portCode);
-
-					let coords = data.latStr + ", " + data.lonStr;
-					$("#portCoords").text(coords);
-
-					tempCard.css("z-index", max_index+1);	// 置顶
+					// 当前card置顶显示
+					tempCard.css("z-index", max_index+1);
 					tempCard.show();
 
 					// 地图标记
@@ -359,7 +359,7 @@
 			if(content.length < 1)
 				return;
 			
-			let url_get_ship_info = "{{ url_for('map.get_ship_info' )}}";
+			let url_get_ship_info = "{{ url_for('map.get_ship_info') }}";
 			//alert(content+" "+url_get_ship_info);
 			
 			$.ajax({
@@ -376,35 +376,32 @@
 						alert(msg);
 						return;
 					}
-
-					let tempCard = $("#cardVessel");
-					let max_index = getMaxIndex(tempCard);
 					
-					// 和上次查询一样，无需重复设置
-					if(data.status == "same"){
-						tempCard.css("z-index", max_index+1);	// 置顶
-						tempCard.show();
-						return;
+					// 清空所有标记
+					map.clearOverlays();
+
+					// 静态信息，和上次查询的船舶不一样则重新设置；一样则无需重复设置
+					if(data.status != "same"){
+						let vesselName = data.ship_nameCn + " - " + data.ship_nameEn;
+						$("#vesselName").text(vesselName);
+
+						$("#vesselTypeNameCn").text(data.vesselTypeNameCn);
+						$("#operatorBodyCn").text(data.operatorBodyCn);
+
+						$("#vesselTypeFullNameCn").text(data.vesselTypeFullNameCn);
+						// 编号
+						$("#mmsi").text(data.mmsi);
+						$("#imo").text(data.imo);
+						$("#callsign").text(data.callsign);
+
+						// 属性参数
+						$("#dwt").text(data.dwt);
+						$("#length_width_height").text(data.length_width_height);
+						$("#buildYearMonth").text(data.buildYearMonth);
+						$("#draught_speed").text(data.draught_speed);
 					}
 
-					let vesselName = data.ship_nameCn + " - " + data.ship_nameEn;
-					$("#vesselName").text(vesselName);
-
-					$("#vesselTypeNameCn").text(data.vesselTypeNameCn);
-					$("#operatorBodyCn").text(data.operatorBodyCn);
-
-					$("#vesselTypeFullNameCn").text(data.vesselTypeFullNameCn);
-					// 编号
-					$("#mmsi").text(data.mmsi);
-					$("#imo").text(data.imo);
-					$("#callsign").text(data.callsign);
-
-					// 属性参数
-					$("#dwt").text(data.dwt);
-					$("#length_width_height").text(data.length_width_height);
-					$("#buildYearMonth").text(data.buildYearMonth);
-					$("#draught_speed").text(data.draught_speed);
-
+					// 动态信息，每次查询重新设置
 					// 起点【AA】 → 终点【BB】
 					$("#legStartPortNameCn").text(data.legStartPortNameCn);
 					$("#legStartPortCtryCode").text(data.legStartPortCtryCode);
@@ -420,10 +417,16 @@
 					// if(data.lon < 0)
 					// 	lonStr = -data.lon + " W";
 
+					// 当前位置坐标
 					let coords = data.latStr + ", " + data.lonStr;
 					$("#curCoords").text(coords);
 
-					tempCard.css("z-index", max_index+1);	// 置顶
+					// 找最顶层的card
+					let tempCard = $("#cardVessel");
+					let max_index = getMaxIndex(tempCard);
+					
+					// 当前card置顶显示
+					tempCard.css("z-index", max_index+1);
 					tempCard.show();
 
 					// 画出路线
