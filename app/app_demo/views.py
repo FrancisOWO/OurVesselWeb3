@@ -19,6 +19,7 @@ demolinks = [
     ["碳交易", "carbon_transaction"],
     ]
 
+
 @demo_bp.route('/test/<demoname>', methods=['GET','POST'])
 def demotest(demoname):
 

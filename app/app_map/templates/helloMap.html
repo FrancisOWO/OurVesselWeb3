@@ -22,7 +22,8 @@
 <!-- <main class="dash-content">
 	<div class="container-fluid"> -->
 		<div id="allmap"></div>
-		<div class="row" style="z-index: 99;">
+		<div id="cards" class="row" style="z-index: 99;">
+			<div id="searchType" style="display:none;"> port </div>
 	        <div id="cardPort" style="position:fixed; top:100px; left:250px; width:500px; display:none;">
 	            <div class="card easion-card">
 	                <div class="card-header bg-primary text-white">
@@ -47,7 +48,7 @@
 	                    <div id="closePort" role="button" style="margin-left: 30px;"> &times; </div>
 	                </div>
 	                <div class="card-body ">
-	                	<h5 id="tabPort" style="margin-bottom: 15px;"> 港口信息 </h5>
+	                	<h5 style="margin-bottom: 15px;"> 港口信息 </h5>
 	                	<table id="tblPort">
 	                		<thead>
 		                		<tr>
@@ -75,6 +76,79 @@
 		                		<tr>
 		                			<th scope="row">港口坐标</th>
 		                			<td id="portCoords">0 N, 0 E</td>
+		                		</tr>
+	                		</tbody>
+	                	</table>
+	                </div>
+	            </div>
+	        </div>        
+	        <div id="cardVessel" style="position:fixed; top:100px; left:250px; width:500px; display:none;">
+	            <div class="card easion-card">
+	                <div class="card-header bg-warning text-dark">
+	                    <div class="easion-card-icon">
+	                        <i class="fas fa-ship"></i>
+	                    </div>
+	                    <div class="easion-card-title">
+	                    	<span id="vesselName"> 船舶 - Vessel </span>
+	                    	<br>
+	                    	<span style="font-size:small;">
+	                    		<span class="badge badge-light" id="vesselTypeNameCn"> 船舶类型 </span>
+	                    		<span class="badge badge-dark" id="operatorBodyCn"> 所属公司 </span>
+	                    	</span>
+	                    </div>
+	                    <div class="easion-card-menu">
+                            <div class="dropdown show">
+                                <a class="easion-card-menu-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+                                    <a class="dropdown-item" id="tabCarbonInfo">碳排放</a>
+                                    <a class="dropdown-item" id="tabCarbonTx">碳交易</a>
+                                </div>
+                            </div>
+                        </div>
+	                    <div id="closeVessel" role="button" style="margin-left: 30px;"> &times; </div>
+	                </div>
+	                <div class="card-body">
+	                	<h5 style="margin-bottom: 15px;"> 船舶信息 </h5>
+	                	<table id="tblVessel">
+	                		<thead>
+		                		<tr>
+		                			<th scope="col" style="width: 150px;"></th>
+		                			<th scope="col"></th>
+		                		</tr>
+	                		</thead>
+	                		<tbody>
+		                		<tr>
+		                			<th scope="row">船舶类型</th>
+		                			<td id="vesselTypeFullNameCn">超大超大超大型船</td>
+		                		</tr>
+		                		<tr>
+		                			<th scope="row">MMSI</th>
+		                			<td id="mmsi">999888777</td>
+		                		</tr>
+		                		<tr>
+		                			<th scope="row">IMO</th>
+		                			<td id="imo">7654321</td>
+		                		</tr>
+		                		<tr style="display: none;">
+		                			<th scope="row">呼号</th>
+		                			<td id="callsign">ABCDE</td>
+		                		</tr>
+		                		<tr>
+		                			<th scope="row">载重吨</th>
+		                			<td id="dwt">300000</td>
+		                		</tr>
+		                		<tr>
+		                			<th scope="row">长&nbsp;*&nbsp;宽&nbsp;*&nbsp;高</th>
+		                			<td id="length_width_height">100.0&nbsp;&times;&nbsp;100.0&nbsp;&times;&nbsp;100.0&nbsp;m</td>
+		                		</tr>
+		                		<tr>
+		                			<th scope="row">建成年月</th>
+		                			<td id="buildYearMonth">2010-01</td>
+		                		</tr>
+		                		<tr>
+		                			<th scope="row">设计吃水&nbsp;/&nbsp;航速</th>
+		                			<td id="draught_speed">22.0&nbsp;m&nbsp;/&nbsp;15.0&nbsp;kn</td>
 		                		</tr>
 	                		</tbody>
 	                	</table>
@@ -180,6 +254,19 @@
 		let map = new BMapGL.Map("allmap");	// 创建Map实例
 		showBMap(map);
 
+		$("#searchType").text("port");
+
+		function getMaxIndex(obj) {
+			let elems = obj.siblings();
+			let max_index = 0;
+			elems.each(function(index, elem){
+				let temp_index = $(elem).css('z-index');
+				if(temp_index != "auto" && temp_index > max_index)
+					max_index = temp_index;
+			});
+			return max_index;
+		}
+
 		// 搜索港口
 		function searchPort() {
 			let content = document.getElementById("txtSearch").value;
@@ -204,9 +291,14 @@
 						return;
 					}
 
+					// 找最顶层的card
+					let tempCard = $("#cardPort");
+					let max_index = getMaxIndex(tempCard);
+
 					// 和上次查询一样，无需重复设置
 					if(data.status == "same"){
-						$("#cardPort").show();
+						tempCard.css("z-index", max_index+1);	// 置顶
+						tempCard.show();
 						return;
 					}
 
@@ -224,7 +316,8 @@
 					let coords = data.latStr + " N, " + data.lonStr + " E";
 					$("#portCoords").text(coords);
 
-					$("#cardPort").show();
+					tempCard.css("z-index", max_index+1);	// 置顶
+					tempCard.show();
 
 					// 地图标记
 					mapCenterAndZoom(map, data.lon, data.lat, 11)
@@ -237,8 +330,86 @@
 			});
 		}
 
+		// 搜索船舶
+		function searchShip() {
+			let content = document.getElementById("txtSearch").value;
+			if(content.length < 1)
+				return;
+			
+			let url_get_ship_info = "{{ url_for('map.get_ship_info' )}}";
+			//alert(content+" "+url_get_ship_info);
+			
+			$.ajax({
+				type: "GET",
+				url: url_get_ship_info,
+				data: {
+					"ship": content,
+					"last_mmsi": $("#mmsi").text()
+				},
+				success: function(data){
+					// 查询失败
+					if(data.status == false){
+						let msg = "未搜索到船舶【" + content + "】相关信息";
+						alert(msg);
+						return;
+					}
+
+					let tempCard = $("#cardVessel");
+					let max_index = getMaxIndex(tempCard);
+					
+					// 和上次查询一样，无需重复设置
+					if(data.status == "same"){
+						tempCard.css("z-index", max_index+1);	// 置顶
+						tempCard.show();
+						return;
+					}
+
+					let vesselName = data.ship_nameCn + " - " + data.ship_nameEn;
+					$("#vesselName").text(vesselName);
+
+					$("#vesselTypeNameCn").text(data.vesselTypeNameCn);
+					$("#operatorBodyCn").text(data.operatorBodyCn);
+
+					$("#vesselTypeFullNameCn").text(data.vesselTypeFullNameCn);
+					// 编号
+					$("#mmsi").text(data.mmsi);
+					$("#imo").text(data.imo);
+					$("#callsign").text(data.callsign);
+
+					// 属性参数
+					$("#dwt").text(data.dwt);
+					$("#length_width_height").text(data.length_width_height);
+					$("#buildYearMonth").text(data.buildYearMonth);
+					$("#draught_speed").text(data.draught_speed);
+
+					tempCard.css("z-index", max_index+1);	// 置顶
+					tempCard.show();
+
+					// 画出路线
+					let m_ship_track_id = "ship_track";
+					removeOverlayByID(map, m_ship_track_id);
+
+					p_list = [[106, 34],[125, 45],[136, 74]];
+					color = "blue";
+					drawPolyTrack(map, m_ship_track_id, p_list, color);
+
+					// 地图标记
+					// mapCenterAndZoom(map, data.lon, data.lat, 11)
+					// markCurrentPoint(map, data.lon, data.lat, data.nameCn);
+					// map.centerAndZoom(new BMapGL.Point(106, 34), 8);
+				},
+				error: function(){
+					alert("ERROR: searchShip");
+				}
+			});
+		}
+
+
 		$("#closePort").on("click", function(){
 			$("#cardPort").hide();
+		});
+		$("#closeVessel").on("click", function(){
+			$("#cardVessel").hide();
 		});
 
 		$("#closeCalendar").on("click", function(){
@@ -273,15 +444,39 @@
 		$("#txtSearch").keypress(function(e){
 			let ev = e || event;
 			if(ev.keyCode == 13){
-				searchPort();
+				if($("#searchType").text() == "ship")
+					searchShip();
+				else
+					searchPort();
 			}
 		});
 
 		// 点击搜索
 		$("#btnSearch").click(function() {
-			searchPort();
+			if($("#searchType").text() == "ship")
+				searchShip();
+			else
+				searchPort();
 		});
 
+
+		// 切换搜索类型
+		$("#btnSearchType").click(function() {
+			if($("#searchType").text() == "ship"){
+				$("#searchShipIcon").hide();
+				$("#searchPortIcon").show();
+
+				$("#searchType").text("port");
+				$("#txtSearch").attr("placeholder", "输入港口");
+			}
+			else {
+				$("#searchPortIcon").hide();
+				$("#searchShipIcon").show();
+
+				$("#searchType").text("ship");
+				$("#txtSearch").attr("placeholder", "输入船舶");
+			}
+		});
 
 		function resizeCalendar() {
 			$(".datepicker").css({"width":"440px"});
@@ -380,7 +575,11 @@
 									+ $(".active.day").text() + "日";
 								$("#activeDate").text(activeDate);
 								$("#holidays").html(holidays_html);
-								$("#cardDate").show();
+
+						    	let tempCard = $("#cardDate");
+								let max_index = getMaxIndex(tempCard);
+								tempCard.css("z-index", max_index+1);	// 置顶
+								tempCard.show();
 							},0);
 						});
 					});
@@ -559,15 +758,23 @@
 
 		$("#tabForecast").on("click", function() {
 	    	fillForecast();
-			$("#cardForecast").show();
+
+	    	let tempCard = $("#cardForecast");
+			let max_index = getMaxIndex(tempCard);
+			tempCard.css("z-index", max_index+1);	// 置顶
+			tempCard.show();
 		});
 		$("#tabCalendar").on("click", function() {
-			$("#cardCalendar").show();
+	    	let tempCard = $("#cardCalendar");
+			let max_index = getMaxIndex(tempCard);
+			tempCard.css("z-index", max_index+1);	// 置顶
+			tempCard.show();
 		});
 
 
 		// 悬浮窗
 		hoverElementByID("cardPort");
+		hoverElementByID("cardVessel");
 		hoverElementByID("cardCalendar");
 		hoverElementByID("cardForecast");
 		hoverElementByID("cardDate");
